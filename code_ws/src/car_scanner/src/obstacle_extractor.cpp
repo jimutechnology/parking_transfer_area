@@ -13,11 +13,12 @@
 #include <opencv2/ml/ml.hpp> 
 #include "opencv2/imgproc/imgproc.hpp"
 #include <iostream> 
+#include <string>
 using namespace std;
 using namespace car_scanner;
 using namespace obstacle_detector;
 
-ObstacleExtractor::ObstacleExtractor(ros::NodeHandle& nh, ros::NodeHandle& nh_local, 
+ObstacleExtractor::ObstacleExtractor(int laser_id, ros::NodeHandle& nh, ros::NodeHandle& nh_local, 
 char *first_input, char *second_input, char *image_path) : nh_(nh), nh_local_(nh_local)
  {
   if (first_input != NULL && second_input != NULL)
@@ -29,19 +30,18 @@ char *first_input, char *second_input, char *image_path) : nh_(nh), nh_local_(nh
     {
       image_path_ = image_path;
     }   
+  this->laser_id = laser_id;
   running = false;
   good_position = false;
   distance_left = 1;
   distance_right = 1;
   distance_front = 2;
-  params_srv_ = nh_local_.advertiseService("params", &ObstacleExtractor::updateParams, this);
   Convert_Image = false;
   initialize();
   wheels_pub_ = nh_.advertise<car_scanner::WheelArray>("wheel_info", 10);
   warning_pub = nh_.advertise<car_scanner::InfoOut>("warning_info", 10);
   error_pub = nh_.advertise<car_scanner::InfoOut>("error_info", 10);
   scan_sub_ = nh_.subscribe("scan", 10, &ObstacleExtractor::scanCallback, this);
-  wheel_cmd_sub_ = nh_.subscribe("wheel_scan", 10, &ObstacleExtractor::wheelCallback, this);
 }
 
 ObstacleExtractor::~ObstacleExtractor() {
@@ -51,21 +51,29 @@ ObstacleExtractor::~ObstacleExtractor() {
   // nh_local_.deleteParam("frame_id");
 }
 
-bool ObstacleExtractor::updateParams(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res) {
-  XmlRpc::XmlRpcValue param;
-  nh_local_.param<std::string>("/obstacle_extractor/SVM_model_path", p_model_path_, "/home/jimu/code/parking_transfer_area/code_ws/src/car_scanner/conf/wheel_classifier.xml");
-  nh_local_.param("/obstacle_extractor/max_group_dis", p_max_group_dis, 0.1);
-  nh_local_.param("/obstacle_extractor/max_tolerant_orientaion", p_max_orientation, 0.3);
-  nh_local_.param("/obstacle_extractor/max_wheels_distance", p_max_wheels_distance, 1.8);
-  nh_local_.param("/obstacle_extractor/min_wheels_distance", p_min_wheels_distance), 1.25;
-  nh_local_.param("/obstacle_extractor/size_mode", p_size_mode, 0);
-  nh_local_.param("/scan_timeout", p_scan_timeout, 0.5);
-  nh_local_.param("/distance_proportion", p_distance_proportion_, 0.00628);
-  nh_local_.param("/obstacle_extractor/range_min", p_range_min, 0.05);
-  nh_local_.param("/obstacle_extractor/range_max", p_range_max, 4.0);
-  nh_local_.param("/obstacle_extractor/noise_threshold", p_noise_threshold, 10);
-  nh_local_.param("/obstacle_extractor/noise_dis", p_noise_dis, 0.2);
-  nh_local_.param<std::string>("/lidar_1/frame_id", p_frame_id_, "laser_1");
+bool ObstacleExtractor::LoadParams() {
+  
+  ros::param::param<std::string>("/obstacle_extractor/SVM_model_path", p_model_path_, "/home/jimu/code/parking_transfer_area/code_ws/src/car_scanner/conf/wheel_classifier.xml");
+  ros::param::param("/obstacle_extractor/max_group_dis", p_max_group_dis, 0.1);
+  ros::param::param("/obstacle_extractor/max_tolerant_orientaion", p_max_orientation, 0.3);
+  ros::param::param("/obstacle_extractor/max_wheels_distance", p_max_wheels_distance, 1.8);
+  ros::param::param("/obstacle_extractor/min_wheels_distance", p_min_wheels_distance), 1.25;
+  ros::param::param("/obstacle_extractor/size_mode", p_size_mode, 0);
+  ros::param::param("/scan_timeout", p_scan_timeout, 0.5);
+  ros::param::param("/distance_proportion", p_distance_proportion_, 0.00628);
+  ros::param::param("/obstacle_extractor/range_min", p_range_min, 0.05);
+  ros::param::param("/obstacle_extractor/range_max", p_range_max, 4.0);
+  ros::param::param("/obstacle_extractor/noise_threshold", p_noise_threshold, 10);
+  ros::param::param("/obstacle_extractor/noise_dis", p_noise_dis, 0.2);
+  ros::param::param<std::string>("/lidar_" + to_string(laser_id) + "/frame_id", p_frame_id_, "laser_1");
+  wheel_array_id_ = p_frame_id_;
+
+  ros::param::param("/obstacle_extractor/distance_left", distance_left, 2.5);
+  ros::param::param("/obstacle_extractor/distance_right", distance_right, 2.5);
+  ros::param::param("/obstacle_extractor/distance_front", distance_front, 3.0);
+  ros::param::param("/obstacle_extractor/min_angle", min_angle, -1.57);
+  ros::param::param("/obstacle_extractor/max_angle", max_angle, 1.57);
+
   return true;
 }
 
@@ -117,19 +125,14 @@ void ObstacleExtractor::scanCallback(const sensor_msgs::LaserScan::ConstPtr scan
 }
 
 // receive the wheel_scan topic command
-void ObstacleExtractor::wheelCallback(const car_scanner::WheelCmd::ConstPtr wheel_cmd) {
-  wheel_array_id_ = wheel_cmd->header.frame_id;
-  laser_id = wheel_cmd->laser_id;
+void ObstacleExtractor::wheel_scan() {
+  // wheel_array_id_ = wheel_cmd->header.frame_id;
+  // laser_id = wheel_cmd->laser_id;
   // determine which lidar to be used to detect wheel
-  p_frame_id_ = "laser_" + to_string(laser_id);
-  distance_left = wheel_cmd->distance_left;
-  distance_right = wheel_cmd->distance_right;
-  distance_front = wheel_cmd->distance_front;
+  // p_frame_id_ = "laser_" + to_string(laser_id);
 
-  min_angle = wheel_cmd->min_angle;
-  max_angle = wheel_cmd->max_angle;
 
-  running = wheel_cmd->running;
+  running = true;
   //cout << "call back running is "<< running << endl;
 }
 
@@ -167,10 +170,18 @@ void ObstacleExtractor::detectWheels(PointSet& tmp1, PointSet& tmp2)
     point_set->class_result = 1;
    }
    // core algorithm
+   
+   cout << "raw: " << endl;
+   for (PointIterator i = point_set->group.begin(); i != point_set->group.end(); ++i)
+       cout << i->x << ", " << i->y << "; ";
+   cout << endl;
+   cout << point_set->max_x << ", " << point_set->min_x << ", " << point_set->max_y << ", " << point_set->min_y << ", " << point_set->num_points << ", " << point_set->class_result << endl;
+   
    if (point_set->max_x < distance_front && point_set->min_x > 0 && point_set->max_y < distance_left && 
     point_set->min_y > -distance_right && point_set->num_points > 10 && point_set->class_result == 1 &&
     point_set->min_y * point_set->max_y > 0)
    {
+      // cout << "OK " << endl;
       // first filter the tmp1 from point_sets pool through x coordinate of short edge feature point
       // set the nearest 2 cluster as tmp1 and tmp2 while tmp2 < tmp1
       if (abs(point_set->short_fp.x) < abs(tmp1.short_fp.x))
@@ -233,6 +244,7 @@ void ObstacleExtractor::publishTires()
     warning_out.message = "No complete wheels!";
     warning_pub.publish(warning_out);
     wheelarray.ready = false;
+    cout << tmp1.num_points << " " << tmp2.num_points << " " << wheel_array_id_ << endl;
   }
   // there are two complete wheels
   else
@@ -282,116 +294,86 @@ void ObstacleExtractor::publishTires()
       wheelarray.interval = wheel_distance;
       wheelarray.ready = false;
     }
-    double tmp1_length = (tmp1.top_point - tmp1.middle_point).length();
-    double tmp2_length = (tmp2.top_point - tmp2.middle_point).length();
-    if (tmp1_length < 0.3 || tmp2_length < 0.3 || abs(tmp1.num_points - tmp2.num_points) > 10 || abs(tmp1_length - tmp2_length) > 0.2)
+    // double tmp1_length = (tmp1.top_point - tmp1.middle_point).length();
+    // double tmp2_length = (tmp2.top_point - tmp2.middle_point).length();
+    double tmp1_length = (tmp1.bottom_point - tmp1.middle_point).length(); // TODO
+    double tmp2_length = (tmp2.bottom_point - tmp2.middle_point).length();
+    //cout << tmp1_length << ", " << tmp2_length << ", " << tmp1.num_points << ", " << tmp2.num_points << endl;
+    
+    // if (tmp1_length < 0.3 || tmp2_length < 0.3 || abs(tmp1.num_points - tmp2.num_points) > 10 || abs(tmp1_length - tmp2_length) > 0.2) // TODO: 20 was 10
+    if (tmp1_length < 0.3 || tmp2_length < 0.3 || abs(tmp1.num_points - tmp2.num_points) > 20 || abs(tmp1_length - tmp2_length) > 0.2)
       good_position = false;
     else
       good_position = true;
+    // cout << good_position << (tmp1_length < 0.3) << (tmp2_length < 0.3) << (abs(tmp1.num_points - tmp2.num_points) > 10) << (abs(tmp1_length - tmp2_length) > 0.2) << endl;
     MF.push_back(tmp1);
     MF.push_back(tmp2);
     // both wheels on right side
     if (MF[0].min_y <= 0 && MF[1].min_y <= 0)
     {
       first_points.push_back(MF[0].top_point);
-
       second_points.push_back(MF[0].middle_point);
-
       third_points.push_back(MF[0].bottom_point);
-
       first_points.push_back(MF[1].top_point);
-
       second_points.push_back(MF[1].middle_point);
-
       third_points.push_back(MF[1].bottom_point);
-
     }
-
 
     // both wheels on each side
     if ((MF[0].max_y <= 0 && MF[1].max_y >= 0) || (MF[0].max_y >= 0 && MF [1].max_y <= 0))
     {
         if (good_position == false)
         {
-        if (MF[0].max_y > 0)
+          if (MF[0].max_y > 0)
           { 
             first_points.push_back(Point (MF[0].max_x, MF[0].min_y));
-
             second_points.push_back(Point (MF[0].min_x, MF[0].min_y));
-
             third_points.push_back(Point (MF[0].min_x, MF[0].max_y));
-
             first_points.push_back(Point (MF[1].max_x, MF[1].max_y));
-
             second_points.push_back(Point (MF[1].min_x, MF[1].max_y));
-
             third_points.push_back(Point (MF[1].min_x, MF[1].min_y));
           }
-        else
+          else
           {
             first_points.push_back(Point (MF[0].max_x, MF[0].max_y));
-
             second_points.push_back(Point (MF[0].min_x, MF[0].max_y));
-
             third_points.push_back(Point (MF[0].min_x, MF[0].min_y));
-
             first_points.push_back(Point (MF[1].max_x, MF[1].min_y));
-
             second_points.push_back(Point (MF[1].min_x, MF[1].min_y));
-
             third_points.push_back(Point (MF[1].min_x, MF[1].max_y));
           }
         }
         else  
         {
           first_points.push_back(MF[0].top_point);
-
           second_points.push_back(MF[0].middle_point);
-
           third_points.push_back(MF[0].bottom_point);
-
           first_points.push_back(MF[1].top_point);
-
           second_points.push_back(MF[1].middle_point);
-
           third_points.push_back(MF[1].bottom_point);
         }
-
     }
 
     // both wheels on left side
     if (MF[0].max_y >= 0 && MF[1].max_y >= 0)
     {
-
       if (MF[0].max_y > MF[1].max_y)
       {
-      third_points.push_back(Point (MF[0].min_x, MF[0].max_y));
-
-      second_points.push_back(Point (MF[0].min_x, MF[0].min_y));
-
-      first_points.push_back(Point (MF[0].max_x, MF[0].min_y));
-
-      third_points.push_back(Point (MF[1].min_x, MF[1].min_y));
-
-      second_points.push_back(Point (MF[1].min_x, MF[1].max_y));
-
-      first_points.push_back(Point (MF[1].max_x, MF[1].max_y));
-
+        third_points.push_back(Point (MF[0].min_x, MF[0].max_y));
+        second_points.push_back(Point (MF[0].min_x, MF[0].min_y));
+        first_points.push_back(Point (MF[0].max_x, MF[0].min_y));
+        third_points.push_back(Point (MF[1].min_x, MF[1].min_y));
+        second_points.push_back(Point (MF[1].min_x, MF[1].max_y));
+        first_points.push_back(Point (MF[1].max_x, MF[1].max_y));
       }
       else
       {
-      third_points.push_back(Point (MF[1].min_x, MF[1].max_y));
-
-      second_points.push_back(Point (MF[1].min_x, MF[1].min_y));
-
-      first_points.push_back(Point (MF[1].max_x, MF[1].min_y));
-
-      third_points.push_back(Point (MF[0].min_x, MF[0].min_y));
-
-      second_points.push_back(Point (MF[0].min_x, MF[0].max_y));
-
-      first_points.push_back(Point (MF[0].max_x, MF[0].max_y));
-      
+        third_points.push_back(Point (MF[1].min_x, MF[1].max_y));
+        second_points.push_back(Point (MF[1].min_x, MF[1].min_y));
+        first_points.push_back(Point (MF[1].max_x, MF[1].min_y));
+        third_points.push_back(Point (MF[0].min_x, MF[0].min_y));
+        second_points.push_back(Point (MF[0].min_x, MF[0].max_y));
+        first_points.push_back(Point (MF[0].max_x, MF[0].max_y));
       }
     }
     //cout << "publish the data " << endl;

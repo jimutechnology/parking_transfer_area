@@ -173,6 +173,14 @@ add_dependencies(obstacle_extractor_node
   robot_msgs_gencpp
 )
 
+add_executable(car_extractor_node
+  src/car_extractor_node.cpp
+  src/car_extractor.cpp
+)
+add_dependencies(car_extractor_node
+  robot_msgs_gencpp
+)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -192,6 +200,10 @@ target_link_libraries(obstacle_extractor_node
   ${catkin_LIBRARIES}
   ${OpenCV_LIBS}  
   ${ARMADILLO_LIBRARIES}
+)
+
+target_link_libraries(car_extractor_node
+  ${catkin_LIBRARIES}
 )
 
 

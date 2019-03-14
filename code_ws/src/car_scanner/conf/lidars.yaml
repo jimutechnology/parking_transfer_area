@@ -9,3 +9,12 @@ obstacle_extractor:
     range_max: 4.0 # The largest range value of lidar data
     noise_threshold: 10 # the point cluster whose number of cloud points less than it will be considered as noise
     noise_dis: 0.05      # cloud point is considered part of an object if its distance from the object is within (noise_dis + error)
+    
+    distance_left:      2.5     # scan region of the lidar
+    distance_right:     2.5
+    distance_front:     3.0
+    min_angle:          -1.57
+    max_angle:          1.57
+
+distance_proportion: 0.00628
+scan_timeout: 0.5

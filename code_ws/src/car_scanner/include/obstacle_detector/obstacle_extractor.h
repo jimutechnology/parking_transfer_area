@@ -21,20 +21,17 @@ namespace obstacle_detector
 class ObstacleExtractor
 {
 public:
-  ObstacleExtractor(ros::NodeHandle& nh, ros::NodeHandle& nh_local, char *first_input, char *second_input, char *image_path);
+  ObstacleExtractor(int laser_id, ros::NodeHandle& nh, ros::NodeHandle& nh_local, char *first_input, char *second_input, char *image_path);
   ~ObstacleExtractor();
   void checkScan();
-  
+  void wheel_scan();
 
 private:
-  bool updateParams(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
+  bool LoadParams();
   void scanCallback(const sensor_msgs::LaserScan::ConstPtr scan_msg);
-  void wheelCallback(const car_scanner::WheelCmd::ConstPtr wheel_cmd);
-  void initialize() { std_srvs::Empty empt; updateParams(empt.request, empt.response); }
+  void initialize() { LoadParams(); }
   void groupPoints(double p_max_group_distance_);
-  
-
-  
+    
   void detectWheels(PointSet& tmp1, PointSet& tmp2);
   void publishTires();
 

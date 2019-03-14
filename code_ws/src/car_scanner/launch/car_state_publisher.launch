@@ -8,7 +8,7 @@
         <param name="frame_id" type="str" value="laser_1" />
         <param name="min_ang" type="double" value="-1.5707963268" />
         <param name="max_ang" type="double" value="1.5007963268" />
-        <param name="hostname" type="string" value="192.168.1.37" />
+        <param name="hostname" type="string" value="192.168.1.38" />
         <param name="port" type="string" value="2112" />
     </node>
     
@@ -16,10 +16,10 @@
         <param name="frame_id" type="str" value="laser_2" />
         <param name="min_ang" type="double" value="-1.5707963268" />
         <param name="max_ang" type="double" value="1.4507963268" />
-        <param name="hostname" type="string" value="192.168.1.38" />
+        <param name="hostname" type="string" value="192.168.1.37" />
         <param name="port" type="string" value="2112" />
     </node>
 
-    <node pkg="tf" type="static_transform_publisher" name="lasers_link" args="5.00 0 0 3.1415926 0 0 laser_1 laser_2 5" />
+    <node pkg="tf" type="static_transform_publisher" name="lasers_link" args="4.56 0 0 3.1415926 0 0 laser_1 laser_2 5" />
 
 </launch>
