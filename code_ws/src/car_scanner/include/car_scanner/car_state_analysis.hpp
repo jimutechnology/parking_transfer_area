@@ -16,8 +16,8 @@
  *
  */
 
-#ifndef CAR_STATE_ANALYSIS
-#define CAR_STATE_ANALYSIS
+#ifndef CAR_STATE_ANALYSIS_H__
+#define CAR_STATE_ANALYSIS_H__
 
 #include "car_scanner/CarInfo.h"
 #include "car_scanner/CarState.h"
@@ -56,4 +56,4 @@ public:
 		
 };
 
-#endif  // CAR_STATE_ANALYSIS
+#endif  // CAR_STATE_ANALYSIS_H__

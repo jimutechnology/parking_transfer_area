@@ -32,6 +32,7 @@ bool 	CarStateAnalysis::GetCarState(CarState &carState)
 	if (b_available && b_init)
 	{
 		carState = this->carState;
+		b_available = false;
 		return true;
 	}
 	else
