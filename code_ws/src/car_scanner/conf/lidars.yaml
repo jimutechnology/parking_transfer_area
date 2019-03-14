@@ -1,0 +1,11 @@
+obstacle_extractor:
+    SVM_model_path: "/home/jimu/code/parking_transfer_area/code_ws/src/car_scanner/conf/wheel_classifier.xml"
+    max_group_dis: 0.15 # the distance threshold for clustering points into groups
+    max_tolerant_orientaion: 0.3
+    max_wheels_distance: 1.8 # When the wheels distance is more than it, the robot arm is enough long to catch wheels
+    min_wheels_distance: 1.25 # When the wheels distance is less than it, the robot cannot go through wheels
+    size_mode: 0 # 0 means average, 1 means max, 2 means min
+    range_min: 0.05 # The smallest range value of lidar data
+    range_max: 4.0 # The largest range value of lidar data
+    noise_threshold: 10 # the point cluster whose number of cloud points less than it will be considered as noise
+    noise_dis: 0.05      # cloud point is considered part of an object if its distance from the object is within (noise_dis + error)

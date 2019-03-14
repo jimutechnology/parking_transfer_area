@@ -1,0 +1,25 @@
+<launch>
+    <rosparam command="load" file="$(find car_scanner)/conf/transfer_area.yaml"/>
+    <rosparam command="load" file="$(find car_scanner)/conf/lidars.yaml"/>
+    
+    <node name="wheel_extractor" pkg="car_scanner" type="obstacle_extractor_node" output = "screen"/>
+
+    <node name="laser_1" pkg="sick_tim" type="sick_tim551_2050001" respawn="false">
+        <param name="frame_id" type="str" value="laser_1" />
+        <param name="min_ang" type="double" value="-1.5707963268" />
+        <param name="max_ang" type="double" value="1.5007963268" />
+        <param name="hostname" type="string" value="192.168.1.37" />
+        <param name="port" type="string" value="2112" />
+    </node>
+    
+    <node name="laser_2" pkg="sick_tim" type="sick_tim551_2050001" respawn="false">
+        <param name="frame_id" type="str" value="laser_2" />
+        <param name="min_ang" type="double" value="-1.5707963268" />
+        <param name="max_ang" type="double" value="1.4507963268" />
+        <param name="hostname" type="string" value="192.168.1.38" />
+        <param name="port" type="string" value="2112" />
+    </node>
+
+    <node pkg="tf" type="static_transform_publisher" name="lasers_link" args="5.00 0 0 3.1415926 0 0 laser_1 laser_2 5" />
+
+</launch>

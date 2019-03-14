@@ -1,0 +1,7 @@
+# Request fields empty
+---
+# Response fields
+# pose of scanning point for robot (aligning with the middle point of front edge of front wheels)
+float64 	x_scan_point
+float64 	y_scan_point
+float64 	yaw_scan_point

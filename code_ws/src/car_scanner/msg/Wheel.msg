@@ -1,0 +1,3 @@
+geometry_msgs/Point first_point
+geometry_msgs/Point second_point
+geometry_msgs/Point third_point
