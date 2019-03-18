@@ -19,6 +19,7 @@ private:
   std::list<Point> laser_points;
   Eigen::Matrix2i rotation1;
   Eigen::Matrix2i rotation2;
+  Eigen::Matrix2i rotation3;
   Eigen::RowVector2i translation;
   Point feature_point;
   int width;
@@ -50,6 +51,9 @@ public:
   rotation2 << -1, 0,
   0, -1;
 
+  rotation3 << 0, -1, 
+  -1, 0;
+
   translation << 0.5*width, 0.5*length;
 
   typedef std::list<Point>::iterator PointIterator;
@@ -65,7 +69,7 @@ public:
      {
      Eigen::RowVector2i v(x, y);
      Eigen::RowVector2i w;
-     w = v * rotation2 + translation;
+     w = v * rotation3 + translation;
      //cout << "the w is " << w << endl;
      image.at<float>(w(0,0), w(0,1)) = 65535;
      }
