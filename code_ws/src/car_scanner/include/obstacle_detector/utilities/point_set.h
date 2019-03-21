@@ -161,6 +161,7 @@ public:
        bottom_point = group.front();
     }  
     double k = tan(orientation);
+    cout << orientation << endl;
     double x0 = top_point.x;
     double y0 = top_point.y;
     double x1 = bottom_point.x;

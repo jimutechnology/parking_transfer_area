@@ -16,21 +16,18 @@
 #include "car_scanner/CarInfo.h"
 #include "car_scanner/WheelArray.h"
 #include "car_scanner/Wheel.h"
+#include <string>
+#include <vector>
 using namespace car_scanner;
+using namespace std;
 
-#define     NUM_WHEELS  4   // number of wheels on a car
-/*
 enum WheelIndex{
     LEFT_FRONT = 0,
     LEFT_REAR = 1,
     RIGHT_FRONT = 2,
-    RIGHT_REAR = 3
+    RIGHT_REAR = 3, 
+    NUM_WHEELS = 4      // number of wheels
 };
-*/
-#define     LEFT_FRONT  0
-#define     LEFT_REAR   1
-#define     RIGHT_FRONT 2
-#define     RIGHT_REAR  3
 
 class CarExtractor{
 public:
@@ -46,9 +43,15 @@ protected:
     bool    b_available;
     bool    b_init;                         // whether object initialized
 
+    string  left_lidar_frame_id;            // frame id (string: e.g. lidar_1) of lidars
+    string  right_lidar_frame_id;
+
+    vector<double>  transform_lidar_1;      // transformation from transfer frame to lidar frame      
+    vector<double>  transform_lidar_2;
 
 public:
-    void    LoadParam();                    // load parameters -- BE SURE TO SET b_init
+    void    LoadParam();                    // load parameters 
+                                            // -- BE SURE TO SET b_init, left_lidar_frame_id, right_lidar_frame_id
     void    UpdateWheelInfo(const WheelArray &wheelInfo);    // receive wheel info and update
     bool    GetCarInfo(CarInfo &carInfo);   // Get car-info from this object
 
@@ -57,11 +60,8 @@ private:
 
 private:
     Wheel       wheels[NUM_WHEELS];         // all wheels' info
+    CarInfo     carInfo;                    // car info
 
-    float       wheel_length;               // wheel length for all, [m]
-    float       wheel_width;                // wheel width for all, [m]
-    float       wheelbase_length;           // wheel base length, [m]
-    float       wheel_distance;             // wheel distance, [m]
 
 };
 

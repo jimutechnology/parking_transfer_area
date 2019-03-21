@@ -29,13 +29,17 @@ public:
 private:
   bool LoadParams();
   void scanCallback(const sensor_msgs::LaserScan::ConstPtr scan_msg);
-  void initialize() { LoadParams(); }
+  void initialize() { 
+    LoadParams(); 
+    // classifier.load(p_model_path_);
+  }
   void groupPoints(double p_max_group_distance_);
     
   void detectWheels(PointSet& tmp1, PointSet& tmp2);
   void publishTires();
 
-
+  // the living SVM model path
+  // Classifier classifier;
 
   // Wheels wheels;
 

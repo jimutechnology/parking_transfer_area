@@ -2,7 +2,7 @@ obstacle_extractor:
     SVM_model_path: "/home/jimu/code/parking_transfer_area/code_ws/src/car_scanner/conf/wheel_classifier.xml"
     max_group_dis: 0.15 # the distance threshold for clustering points into groups
     max_tolerant_orientaion: 0.3
-    max_wheels_distance: 1.8 # When the wheels distance is more than it, the robot arm is enough long to catch wheels
+    max_wheels_distance: 2.8 # When the wheels distance is more than it, the robot arm is enough long to catch wheels
     min_wheels_distance: 1.25 # When the wheels distance is less than it, the robot cannot go through wheels
     size_mode: 0 # 0 means average, 1 means max, 2 means min
     range_min: 0.05 # The smallest range value of lidar data
@@ -12,7 +12,7 @@ obstacle_extractor:
     
     distance_left:      2.5     # scan region of the lidar
     distance_right:     2.5
-    distance_front:     3.0
+    distance_front:     2.0
     min_angle:          -1.57
     max_angle:          1.57
 

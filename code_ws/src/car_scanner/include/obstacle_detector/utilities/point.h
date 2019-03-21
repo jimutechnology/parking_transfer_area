@@ -61,7 +61,7 @@ public:
   double angleDeg()      const { return 180.0 * atan2(y, x) / M_PI; }
   double dot(const Point& p)   const { return x * p.x + y * p.y; }
   double cross(const Point& p) const { return x * p.y - y * p.x; }
-
+  double orientation(const Point& p)  const { Point r = p - *this; return r.angle(); }
   Point normalized() { return (length() > 0.0) ? *this / length() : *this; }
   Point reflected(const Point& normal) const { return *this - 2.0 * normal * (normal.dot(*this)); }
   Point perpendicular() const { return Point(-y, x); }

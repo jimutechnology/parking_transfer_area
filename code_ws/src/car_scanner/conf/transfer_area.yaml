@@ -1,10 +1,10 @@
 lidar_1:              # Lidar parameters of a lidar in the transfer area
   frame_id: "laser_1"        # frame_id of the lidar
-  pose: [3.0, 2.0, -1.57079633]  # pose [x, y, yaw] of the lidar w.r.t. {T} (transfer area frame)
+  pose: [2.50, 2.0, -1.57079633]  # pose [x, y, yaw] of the lidar w.r.t. {T} (transfer area frame)
 
 lidar_2:
   frame_id: "laser_2"
-  pose: [3.0, -2.0, 1.57079633]
+  pose: [2.50, -2.0, 1.57079633]
 
 # TODO: parameters
 car_spec:              # spec limits for the car
@@ -19,10 +19,10 @@ car_pose_limit:            # limits for the pose of the car
   min_car_yaw:      -0.1  # min yaw of the car, [rad]
   max_front_steering_angle:  0.1  # max steering angle of front wheels of the car, [rad]
   min_front_steering_angle:  -0.1  # min steering angle of front wheels of the car, [rad]
-  max_car_x:          -2.5  # max X position of the car, [m]
-  min_car_x:        -3.5  # min X position of the car, [m]
-  max_car_y:        -2.5  # max Y position of the car, [m]
-  min_car_y:        -3.5  # min Y position of the car, [m]
+  max_car_x:         3.0  # max X position of the car, [m]
+  min_car_x:        2.0   # min X position of the car, [m]
+  max_car_y:         0.5  # max Y position of the car, [m]
+  min_car_y:        -0.5  # min Y position of the car, [m]
 
 # TODO: estimated parameters
 para_default:            # some esimated defaul parameters

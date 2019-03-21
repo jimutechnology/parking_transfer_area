@@ -1,4 +1,6 @@
 // the file is used to classify whether a point set is a wheel
+// #ifndef CLASSIFIER_H__
+// #define CLASSIFIER_H__
 #include <stdlib.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>
@@ -15,11 +17,13 @@ using namespace cv::ml;
 class Classifier
 {
  public:
-    Classifier(const string model_path)
+    Classifier(){}
+    ~Classifier(){}
+
+    void load(const string model_path)
     {
         svm = Algorithm::load<SVM>(model_path);
     }
-    ~Classifier(){}
 
     void predict(PointSet& ps)
     {
@@ -45,3 +49,5 @@ class Classifier
         Converter converter;
 
 };
+
+// #endif  // CLASSIFIER_H__

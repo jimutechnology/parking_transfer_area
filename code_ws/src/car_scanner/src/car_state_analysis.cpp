@@ -22,8 +22,18 @@ void 	CarStateAnalysis::UpdateCar(const CarInfo &carInfo)
 		carState.is_wheel_distance_short = (carInfo.length_wheel_distance < min_wheels_distance);
 		carState.is_wheel_distance_long = (carInfo.length_wheel_distance > max_wheels_distance);
 
+		carState.is_car_available = !(carState.is_position_left || carState.is_position_right
+		                         || carState.is_position_front || carState.is_position_back
+		                         || carState.is_yaw_left || carState.is_yaw_right
+		                         || carState.is_steering_left || carState.is_steering_right
+		                         || carState.is_wheelbase_short || carState.is_wheelbase_long
+		                         || carState.is_wheel_distance_short || carState.is_wheel_distance_long);
         cout << carInfo.X << " " << carInfo.Y << " " << carInfo.yaw << " " << carInfo.steering << " " << carInfo.length_wheelbase << " " << carInfo.length_wheel_distance << endl;
         cout << min_car_y << " " << min_car_x << " " << min_car_yaw << " " << min_front_steering_angle << " " << min_wheelbase << " " << min_wheels_distance << endl;
+
+        carState.aX = carInfo.aX;
+        carState.aY = carInfo.aY;
+        carState.aYaw = carInfo.aYaw;
 	}
 }
 

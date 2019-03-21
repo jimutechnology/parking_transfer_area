@@ -3,6 +3,8 @@
     <rosparam command="load" file="$(find car_scanner)/conf/lidars.yaml"/>
     
     <node name="wheel_extractor" pkg="car_scanner" type="obstacle_extractor_node" output = "screen"/>
+    <node name="car_extractor" pkg="car_scanner" type="car_extractor_node" output = "screen" />
+    <node name="car_state_publisher" pkg="car_scanner" type="car_state_publisher" />
 
     <node name="laser_1" pkg="sick_tim" type="sick_tim551_2050001" respawn="false">
         <param name="frame_id" type="str" value="laser_1" />
@@ -20,6 +22,6 @@
         <param name="port" type="string" value="2112" />
     </node>
 
-    <node pkg="tf" type="static_transform_publisher" name="lasers_link" args="4.56 0 0 3.1415926 0 0 laser_1 laser_2 5" />
+    <node pkg="tf" type="static_transform_publisher" name="lasers_link" args="4.0 0 0 3.1415926 0 0 laser_1 laser_2 5" />
 
 </launch>

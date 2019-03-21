@@ -33,9 +33,9 @@ char *first_input, char *second_input, char *image_path) : nh_(nh), nh_local_(nh
   this->laser_id = laser_id;
   running = false;
   good_position = false;
-  distance_left = 1;
-  distance_right = 1;
-  distance_front = 2;
+  distance_left = 2.5;
+  distance_right = 2.5;
+  distance_front = 1.5;
   Convert_Image = false;
   initialize();
   wheels_pub_ = nh_.advertise<car_scanner::WheelArray>("wheel_info", 10);
@@ -70,7 +70,7 @@ bool ObstacleExtractor::LoadParams() {
 
   ros::param::param("/obstacle_extractor/distance_left", distance_left, 2.5);
   ros::param::param("/obstacle_extractor/distance_right", distance_right, 2.5);
-  ros::param::param("/obstacle_extractor/distance_front", distance_front, 3.0);
+  ros::param::param("/obstacle_extractor/distance_front", distance_front, 1.5);
   ros::param::param("/obstacle_extractor/min_angle", min_angle, -1.57);
   ros::param::param("/obstacle_extractor/max_angle", max_angle, 1.57);
 
@@ -80,8 +80,10 @@ bool ObstacleExtractor::LoadParams() {
 
 void ObstacleExtractor::scanCallback(const sensor_msgs::LaserScan::ConstPtr scan_msg) {
   base_frame_id_ = scan_msg->header.frame_id;
+  // cout << "scan callback. " << p_frame_id_ << ", " << base_frame_id_;
   if (base_frame_id_ == p_frame_id_)
   {
+    // cout << "  .IF ";
     scan_stamp = scan_msg->header.stamp;
     double phi = scan_msg->angle_min;
     for (const float r : scan_msg->ranges) 
@@ -109,6 +111,7 @@ void ObstacleExtractor::scanCallback(const sensor_msgs::LaserScan::ConstPtr scan
 
     if (running == true)
     {
+          // cout << "running " << endl;
           if (input_points_.size() != 0)
           {  
           publishTires();
@@ -149,9 +152,10 @@ void ObstacleExtractor::detectWheels(PointSet& tmp1, PointSet& tmp2)
   groupPoints(p_max_group_dis);
  
   PointSet tmp;
-  // the SVM model path
+  // // the SVM model path
   string model_path = p_model_path_;
-  Classifier classifier(model_path);
+  Classifier classifier;
+  classifier.load(model_path);
   // select the two point sets which most likely are tires
   for (PointSetIterator point_set = point_sets.begin(); point_set != point_sets.end(); ++point_set)
   {
@@ -171,12 +175,14 @@ void ObstacleExtractor::detectWheels(PointSet& tmp1, PointSet& tmp2)
    }
    // core algorithm
    
-   cout << "raw: " << endl;
-   for (PointIterator i = point_set->group.begin(); i != point_set->group.end(); ++i)
-       cout << i->x << ", " << i->y << "; ";
-   cout << endl;
-   cout << point_set->max_x << ", " << point_set->min_x << ", " << point_set->max_y << ", " << point_set->min_y << ", " << point_set->num_points << ", " << point_set->class_result << endl;
-   
+   // cout << "raw: " << endl;
+   // for (PointIterator i = point_set->group.begin(); i != point_set->group.end(); ++i)
+   //     cout << i->x << ", " << i->y << "; ";
+   // cout << endl;
+   // cout << point_set->max_x << ", " << point_set->min_x << ", " << point_set->max_y << ", " << point_set->min_y << ", " << point_set->num_points << ", " << point_set->class_result << endl;
+   // cout << (point_set->max_x < distance_front) << (point_set->min_x > 0) << (point_set->max_y < distance_left)
+   //      << (point_set->min_y > -distance_right) << (point_set->num_points > 10) << (point_set->class_result == 1 )
+   //      << (point_set->min_y * point_set->max_y > 0) << endl;
    if (point_set->max_x < distance_front && point_set->min_x > 0 && point_set->max_y < distance_left && 
     point_set->min_y > -distance_right && point_set->num_points > 10 && point_set->class_result == 1 &&
     point_set->min_y * point_set->max_y > 0)
@@ -206,7 +212,14 @@ void ObstacleExtractor::detectWheels(PointSet& tmp1, PointSet& tmp2)
   // cout << "the tmp1 bottom_point is " << tmp1.bottom_point << endl;
   // cout << "the tmp2 top_point is " << tmp2.top_point << endl;
   // cout << "the tmp2 bottom_point is " << tmp2.bottom_point << endl;
-
+  cout << "tmp1: " << endl;
+  for (PointIterator i = tmp1.group.begin(); i != tmp1.group.end(); ++i)
+    cout << i->x << ", " << i->y << "; ";
+  cout << endl;
+  cout << "tmp2: " << endl;
+  for (PointIterator i = tmp2.group.begin(); i != tmp2.group.end(); ++i)
+    cout << i->x << ", " << i->y << "; ";
+  cout << endl;
   if (Convert_Image)
   {
     ImageGenerator Ig;
@@ -259,6 +272,8 @@ void ObstacleExtractor::publishTires()
     {
       ori = atan(-(tmp2.short_fp.x - tmp1.short_fp.x)/(tmp2.short_fp.y - tmp1.short_fp.y));
     }
+    cout << "ori = " << ori << endl;
+    cout << "(" << tmp1.short_fp.x << ", " << tmp1.short_fp.y << ") " << tmp2.short_fp.x << ", " << tmp2.short_fp.y << ")" << endl;
     if (abs(ori) > p_max_orientation)
     {
       warning_out.error_code = err_no.LID_IDF_MAX_ORI;
@@ -311,6 +326,7 @@ void ObstacleExtractor::publishTires()
     // both wheels on right side
     if (MF[0].min_y <= 0 && MF[1].min_y <= 0)
     {
+      // cout << "right sides" << endl;
       first_points.push_back(MF[0].top_point);
       second_points.push_back(MF[0].middle_point);
       third_points.push_back(MF[0].bottom_point);
@@ -322,6 +338,7 @@ void ObstacleExtractor::publishTires()
     // both wheels on each side
     if ((MF[0].max_y <= 0 && MF[1].max_y >= 0) || (MF[0].max_y >= 0 && MF [1].max_y <= 0))
     {
+        // cout << " each side" << endl;
         if (good_position == false)
         {
           if (MF[0].max_y > 0)
@@ -357,6 +374,7 @@ void ObstacleExtractor::publishTires()
     // both wheels on left side
     if (MF[0].max_y >= 0 && MF[1].max_y >= 0)
     {
+      // cout << "left side" << endl;
       if (MF[0].max_y > MF[1].max_y)
       {
         third_points.push_back(Point (MF[0].min_x, MF[0].max_y));

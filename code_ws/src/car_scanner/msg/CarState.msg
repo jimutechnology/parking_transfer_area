@@ -1,3 +1,4 @@
+bool    is_car_available
 # Car state related
 bool    is_position_left 	# Y position too small
 bool    is_position_right	# Y position too big
@@ -12,3 +13,7 @@ bool    is_wheelbase_short 	# wheelbase length too short
 bool    is_wheelbase_long	# wheelbase length too large
 bool    is_wheel_distance_short 	# wheel distance too short
 bool    is_wheel_distance_long 		# wheel distance too large
+# Car access point (middle point of the front edge of front wheels)
+float64 aX                   
+float64 aY
+float64 aYaw

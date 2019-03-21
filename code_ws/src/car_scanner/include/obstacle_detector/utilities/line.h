@@ -23,7 +23,7 @@ public:
   }
 
   double orientation() const {
-    return atan((last_point.y - first_point.y) / (last_point.x - first_point.x));
+    return atan2(last_point.y - first_point.y, last_point.x - first_point.x);
 }
   
   double lengthSquared() const {
