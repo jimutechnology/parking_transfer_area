@@ -8,8 +8,8 @@ lidar_2:
 
 # TODO: parameters
 car_spec:              # spec limits for the car
-  max_wheels_distance:  2.0    # max wheel distance, [m]  
-  min_wheels_distance:  1.0    # min wheel distance, [m]
+  max_outer_wheels_distance:  2.0    # max wheel distance, [m]  
+  min_inner_wheels_distance:  1.0    # min wheel distance, [m]
   max_wheelbase:      3.5    # max wheelbase, [m]
   min_wheelbase:      2.1    # min wheelbase, [m]
 
