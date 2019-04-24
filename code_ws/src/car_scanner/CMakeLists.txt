@@ -1,3 +1,5 @@
+IF(NOT APPLE)
+
 cmake_minimum_required(VERSION 2.8.3)
 project(car_scanner)
 
@@ -256,3 +258,4 @@ target_link_libraries(car_extractor_node
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+ENDIF()
