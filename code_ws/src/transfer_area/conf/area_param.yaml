@@ -1,0 +1,4 @@
+area_param:
+    area_id: 1
+    mqtt_server: "192.168.1.2"
+    enter_car: True
