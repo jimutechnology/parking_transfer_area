@@ -5,8 +5,7 @@
 import time
 from cmd_door  import DoorCommand
 from cmd_detection  import DetectionCommand
-from cmd_savecar  import SavecarCommand
-from cmd_takecar  import TakecarCommand
+from cmd_state  import StateCommand
 
 from transfer_area.msg import CommandReply
 
@@ -14,9 +13,8 @@ class CommandManger:
     def __init__(self):
         self.cmds = {
             "DOOR"      : DoorCommand(),
+            "STATE"     : StateCommand(),
             "DETECTION" : DetectionCommand(),
-            "SAVECAR"   : SavecarCommand(),
-            "TAKECAR"   : TakecarCommand(),
 
         }
 

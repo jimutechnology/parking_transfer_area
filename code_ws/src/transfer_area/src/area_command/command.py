@@ -51,7 +51,6 @@ class Command:
             message_text  = "id: " + str(self.ID)
             message_text += "\n" + "state: " + str(self.getState())
             message_text += "\n" + "error_code: " + str(self.error_code)
-            message_text += "\n" + "message: " + str(self.type)
             if self.text:
                 message_text += "\n" + "text: " + str(self.text)
             if self.message:

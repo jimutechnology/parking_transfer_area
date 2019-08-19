@@ -7,3 +7,11 @@ running_state = {
     "FINISH": 20,
     "FAULT": 100,
 }
+
+area_state = {
+    "FREE"       : 0,
+    "RESERVED"   : 1,
+    "BUSY"       : 2,
+    "UNAVAILABLE": 3, 
+    "ERROR"      : 4
+}

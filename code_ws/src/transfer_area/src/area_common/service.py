@@ -48,6 +48,9 @@ class ServiceNode:
         return rospy.Subscriber(name, data_class, callback, callback_args,
                  queue_size, buff_size, tcp_nodelay)
 
+    def Service(self, name, data_class, callback=None):
+        return rospy.Service(name, data_class, callback)
+
     def loop(self):
         pass
 

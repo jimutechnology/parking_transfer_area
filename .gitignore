@@ -1,6 +1,7 @@
 *.pyc
 code_ws/build
 code_ws/devel
+code_ws/ros_lib
 .DS_Store
 .catkin_workspace
 .vscode

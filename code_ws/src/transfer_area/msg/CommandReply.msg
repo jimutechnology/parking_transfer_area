@@ -8,6 +8,6 @@ uint8 STATE_ERROR    = 6
 uint8 STATE_TIMEOUT  = 7
 
 string command_id
-int32  state
-int16  error_code
+uint8 state
+uint8  error_code
 string message

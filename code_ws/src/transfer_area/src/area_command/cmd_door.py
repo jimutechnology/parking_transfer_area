@@ -26,6 +26,5 @@ class DoorCommand(Command):
         )
         duration = 30 * 1000
         self.setTimeout(duration)
-        self.message = str(doorCommand)
         self.setState(CommandReply.STATE_RUNNING)
         self.door_cmd_pub.publish(doorCommand)

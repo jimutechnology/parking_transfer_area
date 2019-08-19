@@ -52,12 +52,19 @@ add_message_files(
   FILES
   CommandReply.msg
   DoorCmd.msg
+  StateCmd.msg
+  LightCmd.msg
+  LightCurtainState.msg
+  ScreenCmd.msg
+  StateCmd.msg
+  UnderpanDetectionState.msg
 )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#    FILES
-# )
+add_service_files(
+   FILES
+   getAreaState.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(

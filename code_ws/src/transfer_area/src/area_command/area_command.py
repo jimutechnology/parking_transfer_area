@@ -19,7 +19,6 @@ class AreaCommandMqtt(ServiceNode):
         self.lock_cmd_reply = threading.Lock()
 
         self.mqtt_sub_cmd_topic  = "/area/command/{}".format(self.area_id)
-        print self.mqtt_sub_cmd_topic
         self.mqtt_pub_cmd_reply_prefix  = "/area/command_reply/"
 
         self.cmdGroup = manager.CommandManger()
@@ -66,6 +65,7 @@ class AreaCommandMqtt(ServiceNode):
         return True
 
     def on_message_area_command(self, client, userdata, msg):
+        print "receive mqtt"
         if not self.check_message(msg):
             return
         msg_cmd = yaml.load(msg.payload)
