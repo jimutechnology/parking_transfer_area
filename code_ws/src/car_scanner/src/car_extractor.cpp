@@ -141,7 +141,8 @@ void    CarExtractor::CalculateCarInfo()
     carInfo.steering = (angle_wheels[LEFT_FRONT] + angle_wheels[RIGHT_FRONT]) / 2 - carInfo.yaw;
 
     // -- Calculate wheel distance
-    carInfo.length_wheel_distance = second_points[LEFT_REAR].distance(second_points[RIGHT_REAR]) - wheel_width_average;
+    carInfo.length_outer_wheel_distance = second_points[LEFT_REAR].distance(second_points[RIGHT_REAR]);
+    carInfo.length_inner_wheel_distance = carInfo.length_outer_wheel_distance - wheel_width_average * 2;
 
     // -- Calculate wheel base
     Point       mid_front_wheels = ((third_points[LEFT_FRONT] + second_points[LEFT_FRONT]) / 2

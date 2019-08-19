@@ -7,7 +7,8 @@ float64     steering 	# steering angle, [rad]
 
 # Car related
 float64 	length_wheelbase 	# length of wheelbase, [m]
-float64 	length_wheel_distance # length of wheel distance, [m]
+float64 	length_outer_wheel_distance # length of outer wheel distance, [m]
+float64     length_inner_wheel_distance # length of inner wheel distance, [m]
 
 # Access point (middle of the front edge of front wheels)
 float64     aX          # X position, [m]

@@ -1,6 +1,6 @@
 <launch>
     <rosparam command="load" file="$(find car_scanner)/conf/transfer_area.yaml"/>
-    <rosparam command="load" file="$(find car_scanner)/conf/lidars.yaml"/>
+    <rosparam command="load" file="$(find car_scanner)/conf/wheel_extractor.yaml"/>
     
     <node name="wheel_extractor" pkg="car_scanner" type="obstacle_extractor_node" output = "screen"/>
     <node name="car_extractor" pkg="car_scanner" type="car_extractor_node" output = "screen" />

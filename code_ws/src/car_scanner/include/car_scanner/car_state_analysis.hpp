@@ -35,8 +35,8 @@ protected:
 	CarState 	carState;							// states of the car
 	CarInfo 	carInfo;							// info of the car
 	// -- spec limits for the car
-	float 	max_wheels_distance;					// max wheel distance, [m]	
-	float 	min_wheels_distance;					// min wheel distance, [m]
+	float 	max_outer_wheels_distance;				// max outer wheel distance, [m]	
+	float 	min_inner_wheels_distance;				// min inner wheel distance, [m]
 	float 	max_wheelbase; 							// max wheelbase, [m]
 	float 	min_wheelbase; 							// min wheelbase, [m]
 	// -- limits for the pose of the car

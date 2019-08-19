@@ -56,11 +56,11 @@ bool ObstacleExtractor::LoadParams() {
   ros::param::param<std::string>("/obstacle_extractor/SVM_model_path", p_model_path_, "/home/jimu/code/parking_transfer_area/code_ws/src/car_scanner/conf/wheel_classifier.xml");
   ros::param::param("/obstacle_extractor/max_group_dis", p_max_group_dis, 0.1);
   ros::param::param("/obstacle_extractor/max_tolerant_orientaion", p_max_orientation, 0.3);
-  ros::param::param("/obstacle_extractor/max_wheels_distance", p_max_wheels_distance, 1.8);
-  ros::param::param("/obstacle_extractor/min_wheels_distance", p_min_wheels_distance), 1.25;
-  ros::param::param("/obstacle_extractor/size_mode", p_size_mode, 0);
-  ros::param::param("/scan_timeout", p_scan_timeout, 0.5);
-  ros::param::param("/distance_proportion", p_distance_proportion_, 0.00628);
+  // ros::param::param("/obstacle_extractor/max_wheels_distance", p_max_wheels_distance, 1.8);
+  // ros::param::param("/obstacle_extractor/min_wheels_distance", p_min_wheels_distance), 1.25;
+  // ros::param::param("/obstacle_extractor/size_mode", p_size_mode, 0);
+  ros::param::param("/obstacle_extractor/scan_timeout", p_scan_timeout, 0.5);
+  ros::param::param("/obstacle_extractor/distance_proportion", p_distance_proportion_, 0.00628);
   ros::param::param("/obstacle_extractor/range_min", p_range_min, 0.05);
   ros::param::param("/obstacle_extractor/range_max", p_range_max, 4.0);
   ros::param::param("/obstacle_extractor/noise_threshold", p_noise_threshold, 10);
@@ -286,29 +286,29 @@ void ObstacleExtractor::publishTires()
     tmp1.get_rep_point();
     tmp2.get_rep_point();
     // calculate the wheel distance
-    double wheel_distance = tmp1.middle_point.distance(tmp2.middle_point);
-    if (wheel_distance > p_max_wheels_distance)
-    {
-      /*cout << "tmp1 middle point is " << tmp1.middle_point;
-      cout << "tmp2 middle point is " << tmp2.middle_point;
-      cout << "the wheel_distance is " << wheel_distance;
-      */
-      warning_out.error_code = err_no.LID_IDF_MAX_DIS;
-      warning_out.message = "Wheel distance too large!";
-      warning_pub.publish(warning_out);
+    // double wheel_distance = tmp1.middle_point.distance(tmp2.middle_point);
+    // if (wheel_distance > p_max_wheels_distance)
+    // {
+    //   /*cout << "tmp1 middle point is " << tmp1.middle_point;
+    //   cout << "tmp2 middle point is " << tmp2.middle_point;
+    //   cout << "the wheel_distance is " << wheel_distance;
+    //   */
+    //   warning_out.error_code = err_no.LID_IDF_MAX_DIS;
+    //   warning_out.message = "Wheel distance too large!";
+    //   warning_pub.publish(warning_out);
 
-      wheelarray.interval = wheel_distance;
-      wheelarray.ready = false;
-    }
-    else if(wheel_distance < p_min_wheels_distance)
-    {
-      warning_out.error_code = err_no.LID_IDF_MIN_INTV;
-      warning_out.message = "Wheel distance too small!";
-      warning_pub.publish(warning_out);
+    //   wheelarray.interval = wheel_distance;
+    //   wheelarray.ready = false;
+    // }
+    // else if(wheel_distance < p_min_wheels_distance)
+    // {
+    //   warning_out.error_code = err_no.LID_IDF_MIN_INTV;
+    //   warning_out.message = "Wheel distance too small!";
+    //   warning_pub.publish(warning_out);
 
-      wheelarray.interval = wheel_distance;
-      wheelarray.ready = false;
-    }
+    //   wheelarray.interval = wheel_distance;
+    //   wheelarray.ready = false;
+    // }
     // double tmp1_length = (tmp1.top_point - tmp1.middle_point).length();
     // double tmp2_length = (tmp2.top_point - tmp2.middle_point).length();
     double tmp1_length = (tmp1.bottom_point - tmp1.middle_point).length(); // TODO
@@ -410,12 +410,12 @@ void ObstacleExtractor::publishTires()
     }
     double size1 = first_points[0].distance(second_points[0]); 
     double size2 = first_points[1].distance(second_points[1]);
-    if (p_size_mode == 0)
-      wheelarray.size = (size1 + size2)/2;
-    if (p_size_mode == 1)
-      wheelarray.size = max(size1, size2);
-    if (p_size_mode == 2)
-      wheelarray.size = min(size1, size2);
+    // if (p_size_mode == 0)
+    //   wheelarray.size = (size1 + size2)/2;
+    // if (p_size_mode == 1)
+    //   wheelarray.size = max(size1, size2);
+    // if (p_size_mode == 2)
+    //   wheelarray.size = min(size1, size2);
     double score = min(tmp1.confidence, tmp2.confidence);
     wheelarray.score = score;
     wheelarray.orientation = ori;

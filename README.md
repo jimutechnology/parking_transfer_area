@@ -2,4 +2,4 @@
 Software of the transfer area
 
 ## Configuration
-TODO
+Run /code_ws/src/configure.sh

@@ -33,8 +33,8 @@ public:
 		ros::param::get("car_pose_limit/max_car_y", max_car_y);
 		ros::param::get("car_pose_limit/min_front_steering_angle", min_front_steering_angle);
 		ros::param::get("car_pose_limit/max_front_steering_angle", max_front_steering_angle);
-        ros::param::get("car_spec/max_wheels_distance", max_wheels_distance);
-        ros::param::get("car_spec/min_wheels_distance", min_wheels_distance);
+        ros::param::get("car_spec/max_outer_wheels_distance", max_outer_wheels_distance);
+        ros::param::get("car_spec/min_inner_wheels_distance", min_inner_wheels_distance);
         ros::param::get("car_spec/max_wheelbase", max_wheelbase);
         ros::param::get("car_spec/min_wheelbase", min_wheelbase);
 		
