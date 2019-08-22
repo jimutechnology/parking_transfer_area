@@ -9,5 +9,5 @@ uint8 STATE_TIMEOUT  = 7
 
 string command_id
 uint8 state
-uint8  error_code
+uint8 error_code
 string message
