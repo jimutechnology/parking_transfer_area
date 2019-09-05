@@ -53,7 +53,7 @@ ObstacleExtractor::~ObstacleExtractor() {
 
 bool ObstacleExtractor::LoadParams() {
   
-  ros::param::param<std::string>("/obstacle_extractor/SVM_model_path", p_model_path_, "/home/jimu/code/parking_transfer_area/code_ws/src/car_scanner/conf/wheel_classifier.xml");
+  ros::param::param<std::string>("/obstacle_extractor/SVM_model_path", p_model_path_, "/home/ubuntu/parking_transfer_area/code_ws/src/car_scanner/conf/wheel_classifier.xml");
   ros::param::param("/obstacle_extractor/max_group_dis", p_max_group_dis, 0.1);
   ros::param::param("/obstacle_extractor/max_tolerant_orientaion", p_max_orientation, 0.3);
   // ros::param::param("/obstacle_extractor/max_wheels_distance", p_max_wheels_distance, 1.8);
