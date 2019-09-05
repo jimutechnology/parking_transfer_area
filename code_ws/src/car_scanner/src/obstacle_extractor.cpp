@@ -74,6 +74,7 @@ bool ObstacleExtractor::LoadParams() {
   ros::param::param("/obstacle_extractor/min_angle", min_angle, -1.57);
   ros::param::param("/obstacle_extractor/max_angle", max_angle, 1.57);
 
+  ros::param::param("/obstacle_extractor/b_lidar_upsidedown", p_b_lidar_upsidedown, false);
   return true;
 }
 
@@ -89,7 +90,12 @@ void ObstacleExtractor::scanCallback(const sensor_msgs::LaserScan::ConstPtr scan
     for (const float r : scan_msg->ranges) 
     {
       if (r >= p_range_min && r <= p_range_max)
-        input_points_.push_back(Point::fromPoolarCoords(r, phi));
+      {
+        if (p_b_lidar_upsidedown)
+          input_points_.push_back(Point::fromPoolarCoords(r, phi));
+        else // b_lidar_upsidedown == false
+          input_points_.push_back(Point::fromPoolarCoords(r, -phi));
+      }
       phi += scan_msg->angle_increment;
     }
     // filter the noise

@@ -18,3 +18,5 @@ obstacle_extractor:
 
     distance_proportion: 0.00628
     scan_timeout: 0.5
+
+    b_lidar_upsidedown: true         # whether the lidars are upside down

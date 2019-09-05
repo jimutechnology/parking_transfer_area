@@ -86,6 +86,7 @@ private:
   double p_range_max;
   int    p_noise_threshold;
   double p_noise_dis;
+  bool   p_b_lidar_upsidedown;
 
 
   double distance_left;
