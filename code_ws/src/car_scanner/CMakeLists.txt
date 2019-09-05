@@ -23,7 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
 # find_package(Boost REQUIRED COMPONENTS system)
 find_package(Armadillo REQUIRED)
 find_package(OpenCV REQUIRED)
-# find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -141,7 +141,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   ${ARMADILLO_INCLUDE_DIRS}
-  # ${EIGEN_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
 )
 
 set(CMAKE_CXX_FLAGS "-std=c++14 -O0 -g")
@@ -204,6 +204,7 @@ target_link_libraries(obstacle_extractor_node
   ${catkin_LIBRARIES}
   ${OpenCV_LIBS}  
   ${ARMADILLO_LIBRARIES}
+  ${Eigen3_LIBRARIES}
 )
 
 target_link_libraries(car_extractor_node
