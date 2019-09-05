@@ -1,0 +1,37 @@
+<launch>
+    <rosparam command="load" file="$(find transfer_area)/conf/area_param.yaml"/>
+    <rosparam command="load" file="$(find car_scanner)/conf/transfer_area.yaml"/>
+    <rosparam command="load" file="$(find car_scanner)/conf/wheel_extractor.yaml"/>
+    
+    <node name="wheel_extractor" pkg="car_scanner" type="obstacle_extractor_node"/>
+    <node name="car_extractor" pkg="car_scanner" type="car_extractor_node"/>
+    <node name="car_state_publisher" pkg="car_scanner" type="car_state_publisher" />
+
+    <node name="laser_1" pkg="sick_tim" type="sick_tim551_2050001" respawn="false">
+        <param name="frame_id" type="str" value="laser_1" />
+        <param name="min_ang" type="double" value="-1.5707963268" />
+        <param name="max_ang" type="double" value="1.5707963268" />
+        <param name="hostname" type="string" value="192.168.2.101" />
+        <param name="port" type="string" value="2112" />
+    </node>
+    
+    <node name="laser_2" pkg="sick_tim" type="sick_tim551_2050001" respawn="false">
+        <param name="frame_id" type="str" value="laser_2" />
+        <param name="min_ang" type="double" value="-1.5707963268" />
+        <param name="max_ang" type="double" value="1.5707963268" />
+        <param name="hostname" type="string" value="192.168.2.102" />
+        <param name="port" type="string" value="2112" />
+    </node>
+
+    <node pkg="tf" type="static_transform_publisher" name="lasers_link" args="4.0 0 0 3.1415926 0 0 laser_1 laser_2 5" />
+    <node name="serial_node" pkg="rosserial_python" type="serial_node.py" >
+        <param name="ns" value="stm32" />
+        <param name="port" value="/dev/ttyTHS2" />
+        <param name="baud" value="115200" />
+    </node>
+    
+    <node name="area_command" pkg="transfer_area" type="area_command.py" />
+    <node name="door" pkg="transfer_area" type="door.py" />
+    <node name="enter_area" pkg="transfer_area" type="enter_area.py" />
+
+</launch>
