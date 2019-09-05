@@ -164,7 +164,7 @@ add_executable(car_state_publisher
 	src/car_state_analysis.cpp
 )
 add_dependencies(car_state_publisher 
-  robot_msgs_gencpp
+  car_scanner_gencpp
 )
 
 add_executable(obstacle_extractor_node
@@ -172,7 +172,7 @@ add_executable(obstacle_extractor_node
   src/obstacle_extractor.cpp
 )
 add_dependencies(obstacle_extractor_node
-  robot_msgs_gencpp
+  car_scanner_gencpp
 )
 
 add_executable(car_extractor_node
@@ -180,7 +180,7 @@ add_executable(car_extractor_node
   src/car_extractor.cpp
 )
 add_dependencies(car_extractor_node
-  robot_msgs_gencpp
+  car_scanner_gencpp
 )
 
 
