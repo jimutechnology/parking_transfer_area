@@ -91,9 +91,9 @@ void ObstacleExtractor::scanCallback(const sensor_msgs::LaserScan::ConstPtr scan
     {
       if (r >= p_range_min && r <= p_range_max)
       {
-        if (p_b_lidar_upsidedown)
+        if (!p_b_lidar_upsidedown)
           input_points_.push_back(Point::fromPoolarCoords(r, phi));
-        else // b_lidar_upsidedown == false
+        else // b_lidar_upsidedown
           input_points_.push_back(Point::fromPoolarCoords(r, -phi));
       }
       phi += scan_msg->angle_increment;
