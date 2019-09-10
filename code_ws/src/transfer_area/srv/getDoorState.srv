@@ -1,2 +1,2 @@
 ---
-uint8[2] state
+int8[2] state
