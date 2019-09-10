@@ -15,11 +15,10 @@ class AreaCommandMqtt(ServiceNode):
         ServiceNode.__init__(self)
         self.setRate(PRIM_HZ) # no delay
         self.area_id = GetAreaID()
-        print "area_id", self.area_id
         self.lock_cmd_reply = threading.Lock()
 
-        self.mqtt_sub_cmd_topic  = "/area/command/{}".format(self.area_id)
-        self.mqtt_pub_cmd_reply_prefix  = "/area/command_reply/"
+        self.mqtt_sub_cmd_topic  = "sched/dock/command/1" #.format(self.area_id)
+        self.mqtt_pub_cmd_reply_prefix  = "sched/dock/command_reply/"
 
         self.cmdGroup = manager.CommandManger()
         self.cmd_reply_data = CommandReply()
@@ -38,11 +37,11 @@ class AreaCommandMqtt(ServiceNode):
                 self.reply_command_and_reset(command)
 
     def reply_command_and_reset(self, command):
-        reply_topic = self.mqtt_pub_cmd_reply_prefix + command.Session + "/" + self.area_id
+        reply_topic = self.mqtt_pub_cmd_reply_prefix + command.Session + "/1" #self.area_id
         text = command.GetPublishMessage()
         if text:
             self.mqtt.publish(reply_topic, text)
-            print "publish mqtt message"
+            print(reply_topic,text)
         else:
             print('Invalid command reply msg: ', command.ID)
             
@@ -65,18 +64,13 @@ class AreaCommandMqtt(ServiceNode):
         return True
 
     def on_message_area_command(self, client, userdata, msg):
-        print "receive mqtt"
+        print("receive mqtt")
         if not self.check_message(msg):
             return
         msg_cmd = yaml.load(msg.payload)
+        print(msg_cmd)
         self.cmdGroup.execute(msg_cmd)
 
-        if DEBUG_SHOW_CMD:
-            cmd_info = CommandReply()
-            cmd_info.command_id = str(msg_cmd["id"].upper())
-            cmd_info.state = 0
-            cmd_info.message = msg.payload
-            self.cmd_info_pub.publish(cmd_info)
 
     def loop(self):
         self.mqtt.loop()

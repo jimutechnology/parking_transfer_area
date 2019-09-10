@@ -5,7 +5,7 @@
 import rospy
 import threading
 import time
-from robot_msgs.msg import CommandReply
+from transfer_area.msg import CommandReply
 from std_msgs.msg import Header
 from area_common import GetAreaID, Publisher, Subscriber, TimerDuration
 

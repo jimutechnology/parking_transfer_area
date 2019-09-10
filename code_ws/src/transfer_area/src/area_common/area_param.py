@@ -1,6 +1,6 @@
 import rospy
 
-MQTT_HOSTNAME = "192.168.1.2"
+MQTT_HOSTNAME = "192.168.100.123"
 
 class AreaParam:
     def __init__(self, **kwargs):

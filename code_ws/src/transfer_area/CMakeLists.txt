@@ -58,12 +58,16 @@ add_message_files(
   ScreenCmd.msg
   StateCmd.msg
   UnderpanDetectionState.msg
+  InfoOut.msg
 )
 
 ## Generate services in the 'srv' folder
 add_service_files(
    FILES
    getAreaState.srv
+   getDoorState.srv
+   getVersion.srv
+
 )
 
 ## Generate actions in the 'action' folder

@@ -2,7 +2,7 @@
 
 import rospy
 
-from robot_msgs.msg import InfoOut
+from transfer_area.msg import InfoOut
 
 DEFAULT_BUFF_SIZE = 65536
 
