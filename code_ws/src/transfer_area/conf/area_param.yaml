@@ -1,6 +1,6 @@
 area_param:
     area_id: 1
-    mqtt_server: "192.168.100.123"
+    mqtt_server: "192.168.100.2"
     enter_car: True
 
     lidar_1:              # Lidar parameters of a lidar in the transfer area
