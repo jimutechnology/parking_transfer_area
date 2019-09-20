@@ -23,7 +23,7 @@
         <param name="port" type="string" value="2112" />
     </node>
 
-    <node pkg="tf" type="static_transform_publisher" name="lasers_link" args="4.0 0 0 3.1415926 0 0 laser_1 laser_2 5" />
+    <node pkg="tf" type="static_transform_publisher" name="lasers_link" args="4.923 0 0 3.1415926 0 0 laser_1 laser_2 5" />
     <node name="serial_node" pkg="rosserial_python" type="serial_node.py" >
         <param name="ns" value="stm32" />
         <param name="port" value="/dev/ttyTHS2" />
