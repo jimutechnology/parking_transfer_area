@@ -67,7 +67,7 @@ add_service_files(
    getAreaState.srv
    getDoorState.srv
    getVersion.srv
-
+   getGroundStatus.srv
 )
 
 ## Generate actions in the 'action' folder
