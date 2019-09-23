@@ -14,7 +14,7 @@ class DoorCommand(Command):
     def execute(self, cmd_dict):
         doorCommand = DoorCmd(
             header      = self.getHeader(cmd_dict),
-            id     = self.get(cmd_dict, "door_id", 0),
+            id          = self.get(cmd_dict, "door_id", 0),
             action      = self.get(cmd_dict, "action", 0)
         )
         duration = 30 * 1000
