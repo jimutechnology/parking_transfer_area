@@ -9,9 +9,10 @@ running_state = {
 }
 
 area_state = {
-    "FREE"       : 0,
-    "RESERVED"   : 1,
-    "BUSY"       : 2,
-    "UNAVAILABLE": 3, 
-    "ERROR"      : 4
+    "FREE"      : 0,
+    "FORWARD"   : 1,
+    "BACK"      : 2,
+    "QUIT"      : 3,
+    "FINISH"    : 4,
+    "RUNNING"   : 5
 }

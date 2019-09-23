@@ -31,8 +31,7 @@
     </node>
     
     <node name="area_command" pkg="transfer_area" type="area_command.py" output="screen"/>
-    <node name="enter_area" pkg="transfer_area" type="enter_area.py" />
-    <node name="ground" pkg="transfer_area" type="ground.py.py" />
-
+    <node name="ground" pkg="transfer_area" type="ground.py" />
+    <node name="area_manager" pkg="transfer_area" type="area_manager.py" />
 
 </launch>
