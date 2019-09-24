@@ -12,7 +12,7 @@ obstacle_extractor:
     
     distance_left:      2.5     # scan region of the lidar
     distance_right:     2.5
-    distance_front:     2.0
+    distance_front:     2.5
     min_angle:          -1.57
     max_angle:          1.57
 
