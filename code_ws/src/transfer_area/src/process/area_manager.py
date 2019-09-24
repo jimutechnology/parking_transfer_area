@@ -76,7 +76,7 @@ class Status_Manager(ServiceNode):
     def rx_door_cmd(self, data):
         with self.lock_door_cmd_data_rx:
             self.door_cmd_data = data
-            if door_cmd_data.id == 1 and door_cmd_data.action == 0 and self.area_state == AS['FINISH']:
+            if self.door_cmd_data.id == 1 and self.door_cmd_data.action == 0 and self.area_state == AS['FINISH']:
                 self.area_state == AS['RUNNING']
                 print("存车中")
 
