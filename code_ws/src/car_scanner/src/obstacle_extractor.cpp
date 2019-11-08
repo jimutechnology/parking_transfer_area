@@ -252,7 +252,7 @@ void ObstacleExtractor::publishTires()
   {
     warning_out.error_code = err_no.LID_IDF_NO_WHEEL;
     warning_out.message = "No wheel found";
-    warning_pub.publish(warning_out);
+    //warning_pub.publish(warning_out);
     wheelarray.ready = false;
   }
   // judge whether there are two complete wheels
@@ -261,7 +261,7 @@ void ObstacleExtractor::publishTires()
   {
     warning_out.error_code = err_no.LID_IDF_NO_OUTLINE;
     warning_out.message = "No complete wheels!";
-    warning_pub.publish(warning_out);
+    //warning_pub.publish(warning_out);
     wheelarray.ready = false;
     cout << tmp1.num_points << " " << tmp2.num_points << " " << wheel_array_id_ << endl;
   }
@@ -284,7 +284,7 @@ void ObstacleExtractor::publishTires()
     {
       warning_out.error_code = err_no.LID_IDF_MAX_ORI;
       warning_out.message = "Excessive orientation";
-      warning_pub.publish(warning_out);
+      //warning_pub.publish(warning_out);
       wheelarray.ready = false;
     }
     tmp1.orientation = ori;
