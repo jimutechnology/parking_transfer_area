@@ -1,0 +1,4 @@
+#!/bin/bash
+sudo cp area_launch.service /etc/systemd/system/
+sudo cp area_launch /usr/local/bin/
+sudo systemctl enable area_launch

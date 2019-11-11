@@ -1,0 +1,15 @@
+#!/bin/bash
+
+export HOME="/home/ubuntu"
+export ROS_IP=192.168.100.32
+export ROS_MASTER_URI=http://192.168.100.32:11311
+export AREA_ID=1
+export PATH="/opt/ros/kinetic/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+export LD_LIBRARY_PATH="/home/ubuntu/parking_robot/code_ws/devel/lib:/opt/ros/kinetic/lib:/opt/ros/kinetic/lib/aarch64-linux-gnu"
+export PYTHONPATH="/home/ubuntu/parking_robot/code_ws/devel/lib/python2.7/dist-packages:/opt/ros/kinetic/lib/python2.7/dist-packages"
+
+source /opt/ros/kinetic/setup.bash
+source /home/ubuntu/.bashrc
+source /home/ubuntu/parking_transfer_area/code_ws/devel/setup.bash
+
+roslaunch transfer_area start_area.launch
