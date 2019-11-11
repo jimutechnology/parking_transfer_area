@@ -41,7 +41,6 @@ class AreaCommandMqtt(ServiceNode):
         text = command.GetPublishMessage()
         if text:
             self.mqtt.publish(reply_topic, text)
-            print(reply_topic,text)
         else:
             print('Invalid command reply msg: ', command.ID)
             
@@ -64,11 +63,9 @@ class AreaCommandMqtt(ServiceNode):
         return True
 
     def on_message_area_command(self, client, userdata, msg):
-        print("receive mqtt")
         if not self.check_message(msg):
             return
         msg_cmd = yaml.load(msg.payload)
-        print(msg_cmd)
         self.cmdGroup.execute(msg_cmd)
 
 

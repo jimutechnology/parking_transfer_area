@@ -38,7 +38,6 @@ class CommandManger:
         for _, cmd in self.cmds.items():
             if cmd.getState() == CommandReply.STATE_RUNNING:
                 if cmd.Timeout():
-                    print "ID:", cmd.ID, "timeout"
                     cmd.setState(CommandReply.STATE_TIMEOUT)
                     reply_command_and_reset(cmd)
                 else:
