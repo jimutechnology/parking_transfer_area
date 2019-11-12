@@ -23,6 +23,7 @@ class StateCommand(Command):
     def reply_result(self):
         area_state = self.get_ground_status()
         door_state = self.get_doorstate()
+        door_state = [door_state[0],door_state[1]]
         message_text = "area_state: " + str(area_state)
         message_text += "\n" + "door_state: " + str(door_state)
         self.message = str(message_text)
