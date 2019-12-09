@@ -3,6 +3,8 @@
 
 import rospy
 import os
+from std_msgs.msg import Header
+import uuid
 
 def GetAreaID():
     '''
@@ -12,3 +14,10 @@ def GetAreaID():
     if area_id is not None:
         return area_id
     return "0"
+
+
+def getHeader():
+    header = Header()
+    header.stamp = rospy.Time.now()
+    header.frame_id = str(uuid.uuid4())
+    return header

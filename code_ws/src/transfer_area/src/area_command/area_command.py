@@ -4,7 +4,7 @@ import copy
 import yaml
 import threading
 import manager
-from transfer_area.msg import CommandReply
+from transfer_area.msg import CommandReply, DockState
 from area_common import GetAreaID, ServiceNode, RunService, MqttClient
 
 PRIM_HZ = 200
@@ -16,9 +16,13 @@ class AreaCommandMqtt(ServiceNode):
         self.setRate(PRIM_HZ) # no delay
         self.area_id = GetAreaID()
         self.lock_cmd_reply = threading.Lock()
+        self.lock_dock_state = threading.Lock()
 
         self.mqtt_sub_cmd_topic  = "sched/dock/command/1" #.format(self.area_id)
+        self.mqtt_pub_info_topic  = "sched/dock/info/1" #.format(self.area_id)
+
         self.mqtt_pub_cmd_reply_prefix  = "sched/dock/command_reply/"
+        
 
         self.cmdGroup = manager.CommandManger()
         self.cmd_reply_data = CommandReply()
@@ -28,6 +32,7 @@ class AreaCommandMqtt(ServiceNode):
         self.mqtt.Connect()
 
         self.Subscriber("cmd_reply", CommandReply, self.rx_command_reply)
+        self.Subscriber("dock_state", DockState, self.rx_dock_state)
 
     def rx_command_reply(self, data):
         with self.lock_cmd_reply:
@@ -35,6 +40,11 @@ class AreaCommandMqtt(ServiceNode):
             command = self.cmdGroup.UpdateCommand(self.cmd_reply_data)
             if command:
                 self.reply_command_and_reset(command)
+
+    def rx_dock_state(self, data):
+        with self.lock_dock_state:
+            self.dock_state_data = copy.deepcopy(data)
+            self.mqtt.publish(self.mqtt_pub_info_topic, str(self.dock_state_data), 0)
 
     def reply_command_and_reset(self, command):
         reply_topic = self.mqtt_pub_cmd_reply_prefix + command.Session + "/1" #self.area_id
