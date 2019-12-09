@@ -38,10 +38,11 @@ class Command:
     def cleanup(self):
         pass
 
-    def Reply(self, state = CommandReply.STATE_FINISH, detail = ''):
+    def Reply(self, state = CommandReply.STATE_FINISH, error_code = 0, detail = ''):
         cmd_reply = CommandReply(
             command_id = self.ID,
             state = state,
+            error_code = error_code,
             message = detail,
         )
         self.cmd_state_pub.publish(cmd_reply)
