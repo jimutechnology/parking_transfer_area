@@ -51,7 +51,9 @@ catkin_python_setup()
 add_message_files(
   FILES
   CommandReply.msg
+  DockState.msg
   DoorCmd.msg
+  DoorState.msg
   StateCmd.msg
   LightCmd.msg
   LightCurtainState.msg
