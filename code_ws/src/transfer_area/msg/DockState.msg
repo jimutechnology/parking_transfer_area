@@ -4,4 +4,4 @@ int8 ERROR = 2
 
 Header header
 int8 area_state
-DoorState[] door_state
+Door[] door_state
