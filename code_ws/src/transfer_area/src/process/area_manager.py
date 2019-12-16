@@ -5,7 +5,7 @@ import threading
 import time
 import rospy
 import copy
-from transfer_area.msg import CommandReply, StateCmd, UnderpanDetectionState, LightCurtainState, DoorCmd, InfoOut, DockState, DoorState
+from transfer_area.msg import CommandReply, StateCmd, UnderpanDetectionState, LightCurtainState, DoorCmd, InfoOut, DockState, Door
 from transfer_area.srv import getAreaState, getDoorState, getGroundStatus
 
 from area_common import ServiceNode, RunService, getHeader, running_state as RS, area_state as AS
@@ -99,12 +99,15 @@ class Status_Manager(ServiceNode):
     def rx_door_cmd(self, data):
         with self.lock_door_cmd_data_rx:
             self.door_cmd_data = data
-            if self.door_cmd_data.id == 1 and self.door_cmd_data.action == 0 and self.area_state == AS['FINISH']:
-                self.area_state == AS['RUNNING']
-                self.error_out_data.error_code = 0
-                self.error_out_data.message = "存车中"
-                self.warning_pub.publish(self.error_out_data)
-                print("存车中")
+            opens = self.door_cmd_data.door
+            for i in range(len(opens)):
+                if opens[i].id == Door.OUTSIDE and opens[i].position == Door.CLOSE and self.area_state == AS['FINISH']:
+                    self.area_state == AS['RUNNING']
+                    self.error_out_data.error_code = 0
+                    self.error_out_data.message = "存车中"
+                    self.warning_pub.publish(self.error_out_data)
+                    print("存车中")
+                    break
 
     def get_ground_status(self):
         try:
@@ -121,16 +124,11 @@ class Status_Manager(ServiceNode):
     def get_doorstate(self):
         self.dock_state.door_state = []
         try:
-            rospy.wait_for_service('door_state',timeout=0.1)
+            rospy.wait_for_service('door_state',timeout=0.3)
             state = rospy.ServiceProxy('door_state', getDoorState)
             res = state()
-            l = len(res.state)
-            for i in range(l):
-                door = DoorState()
-                door.id = i
-                door.status = res.state[i]
-                self.dock_state.door_state.append(door)
-        except:
+            self.dock_state.door_state = copy.deepcopy(res.door_state)
+        except rospy.ServiceException, e:
             return
 
 
