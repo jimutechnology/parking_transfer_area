@@ -18,10 +18,10 @@ class AreaCommandMqtt(ServiceNode):
         self.lock_cmd_reply = threading.Lock()
         self.lock_dock_state = threading.Lock()
 
-        self.mqtt_sub_cmd_topic  = "sched/dock/command/1" #.format(self.area_id)
-        self.mqtt_pub_info_topic  = "sched/dock/info/1" #.format(self.area_id)
+        self.mqtt_sub_cmd_topic  = "scheduler/dock/command/1" #.format(self.area_id)
+        self.mqtt_pub_info_topic  = "scheduler/dock/info/1" #.format(self.area_id)
 
-        self.mqtt_pub_cmd_reply_prefix  = "sched/dock/command_reply/"
+        self.mqtt_pub_cmd_reply_prefix  = "scheduler/dock/command_reply/"
         
 
         self.cmdGroup = manager.CommandManger()
