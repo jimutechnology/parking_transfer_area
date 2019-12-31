@@ -27,8 +27,8 @@ class Command:
         self.cmd_state_pub  = self.Publisher('cmd_reply', CommandReply, queue_size=1)
 
     def prepare(self, cmd_dict):
-        self.ID         = str(self.get(cmd_dict, "id", ""))
-        self.type       = str(self.get(cmd_dict, "cmd", ""))
+        self.ID         = str(self.get(cmd_dict, "cmd_id", ""))
+        self.type       = str(self.get(cmd_dict, "cmd_name", ""))
         self.Session    = str(self.get(cmd_dict, "session", ""))
         self.time_stamp = self.get(cmd_dict, "time_stamp", self.time_stamp)
 
@@ -38,10 +38,11 @@ class Command:
     def cleanup(self):
         pass
 
-    def Reply(self, state = CommandReply.STATE_FINISH, detail = ''):
+    def Reply(self, state = CommandReply.STATE_FINISH, error_code = 0, detail = ''):
         cmd_reply = CommandReply(
             command_id = self.ID,
             state = state,
+            error_code = error_code,
             message = detail,
         )
         self.cmd_state_pub.publish(cmd_reply)
@@ -69,7 +70,7 @@ class Command:
     def getHeader(self, cmd_dict):
         time_stamp = self.get(cmd_dict, "time_stamp", self.time_stamp)
         return Header(
-            frame_id = str(self.get(cmd_dict, "id", "")),
+            frame_id = str(self.get(cmd_dict, "cmd_id", "")),
             stamp = rospy.Time.from_sec(time_stamp / 1000.0),
         )
 

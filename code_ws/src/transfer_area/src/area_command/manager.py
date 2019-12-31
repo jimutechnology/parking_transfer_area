@@ -18,7 +18,7 @@ class CommandManger:
         }
 
     def execute(self, pydict):
-        cmd_key = str(pydict["cmd"].upper())
+        cmd_key = str(pydict["cmd_name"].upper())
 
         if cmd_key in self.cmds:
             cmd = self.cmds[cmd_key]

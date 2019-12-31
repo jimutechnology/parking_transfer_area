@@ -3,12 +3,14 @@
 
 import threading
 import time
-from transfer_area.msg import CommandReply, StateCmd, UnderpanDetectionState, LightCurtainState, DoorCmd, InfoOut
-from transfer_area.srv import getAreaState
+import rospy
+import copy
+from transfer_area.msg import CommandReply, StateCmd, UnderpanDetectionState, LightCurtainState, DoorCmd, InfoOut, DockState, Door
+from transfer_area.srv import getAreaState, getDoorState, getGroundStatus
 
-from area_common import ServiceNode, RunService, running_state as RS, area_state as AS
+from area_common import ServiceNode, RunService, getHeader, running_state as RS, area_state as AS
 
-PRIM_HZ = 10
+PRIM_HZ = 2
 
 class Status_Manager(ServiceNode):
     def __init__(self):
@@ -18,10 +20,13 @@ class Status_Manager(ServiceNode):
 
         self.lock_loop_data = threading.Lock()
         self.forward_start_time = ''
-       
+
         # Publishers
         self.error_out_data = InfoOut()
         self.warning_pub = self.Publisher('warning_info', InfoOut, queue_size=1)
+
+        self.dock_state = DockState()
+        self.dock_status_pub = self.Publisher('dock_state', DockState, queue_size=1)
 
         # Subscribers
         self.UD_state_data = UnderpanDetectionState()
@@ -94,24 +99,45 @@ class Status_Manager(ServiceNode):
     def rx_door_cmd(self, data):
         with self.lock_door_cmd_data_rx:
             self.door_cmd_data = data
-            if self.door_cmd_data.id == 1 and self.door_cmd_data.action == 0 and self.area_state == AS['FINISH']:
-                self.area_state == AS['RUNNING']
-                self.error_out_data.error_code = 0
-                self.error_out_data.message = "存车中"
-                self.warning_pub.publish(self.error_out_data)
-                print("存车中")
+            opens = self.door_cmd_data.door
+            for i in range(len(opens)):
+                if opens[i].id == Door.OUTSIDE and opens[i].position == Door.CLOSE and self.area_state == AS['FINISH']:
+                    self.area_state == AS['RUNNING']
+                    self.error_out_data.error_code = 0
+                    self.error_out_data.message = "存车中"
+                    self.warning_pub.publish(self.error_out_data)
+                    print("存车中")
+                    break
 
     def get_ground_status(self):
         try:
             rospy.wait_for_service('get_ground_status',timeout=0.1)
             state = rospy.ServiceProxy('get_ground_status', getGroundStatus)
             res = state()
-            return res.is_ground_clear
+            if res.is_ground_clear == True:
+                self.dock_state.area_state = DockState.EMPTY
+            else:
+                self.dock_state.area_state = DockState.OCCUPY
+        except:
+            self.dock_state.area_state = DockState.ERROR
+
+    def get_doorstate(self):
+        self.dock_state.door_state = []
+        try:
+            rospy.wait_for_service('door_state',timeout=0.3)
+            state = rospy.ServiceProxy('door_state', getDoorState)
+            res = state()
+            self.dock_state.door_state = copy.deepcopy(res.door_state)
         except rospy.ServiceException, e:
-            return -1
+            return
+
 
     def loop(self):
         with self.lock_loop_data:
+            self.get_doorstate()
+            self.get_ground_status()
+            self.dock_state.header = copy.deepcopy(getHeader())
+            self.dock_status_pub.publish(self.dock_state)
             if self.area_state == AS['QUIT'] and self.area_state == AS['RUNNING']:
                 if self.get_ground_status == True:
                     self.area_state == AS['FREE']
@@ -133,4 +159,5 @@ class Status_Manager(ServiceNode):
 
 
 if __name__ == '__main__':
+    time.sleep(5)
     RunService(Status_Manager)
