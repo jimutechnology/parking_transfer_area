@@ -25,9 +25,13 @@
 
     <node pkg="tf" type="static_transform_publisher" name="lasers_link" args="4.92 -0.00 0 3.18 0 0 laser_1 laser_2 5" />
     
-    <node name="area_command" pkg="transfer_area" type="area_command.py" output="screen"/>
+    <node name="area_command" pkg="transfer_area" type="area_command.py" />
     <node name="ground" pkg="transfer_area" type="ground.py" />
-    <node name="area_manager" pkg="transfer_area" type="area_manager.py" output="screen"/>
-    <node name="debug_stm32" pkg="transfer_area" type="debug_stm32.py" output="screen"/>
+    <node name="area_manager" pkg="transfer_area" type="area_manager.py"/>
+    <node name="serial_node" pkg="rosserial_python" type="serial_node.py" >
+		<param name="ns" value="stm32" />
+		<param name="port" value="/dev/ttyTHS2" />
+		<param name="baud" value="115200" />
+	</node>
 
 </launch>
