@@ -6,9 +6,9 @@ import time
 import rospy
 import copy
 from transfer_area.msg import CommandReply, StateCmd, UnderpanDetectionState, LightCurtainState, DoorCmd, InfoOut, DockState, Door
-from transfer_area.srv import getAreaState, getDoorState, getGroundStatus
+from transfer_area.srv import getAreaState, getDoorState, getGroundStatus, ScreenCmd
 
-from area_common import ServiceNode, RunService, getHeader, running_state as RS, area_state as AS
+from area_common import ServiceNode, RunService, getHeader, running_state as RS, area_state as AS, screen_state as SS
 
 PRIM_HZ = 2
 
@@ -27,6 +27,11 @@ class Status_Manager(ServiceNode):
 
         self.dock_state = DockState()
         self.dock_status_pub = self.Publisher('dock_state', DockState, queue_size=1)
+
+        self.screen_state = ScreenCmd()
+        self.screen_state.id = 0
+        self.screen_state.state = SS['空闲']
+        self.screen_cmd_pub = self.Publisher('screen_cmd', ScreenCmd, queue_size=1)
 
         # Subscribers
         self.UD_state_data = UnderpanDetectionState()
@@ -50,7 +55,10 @@ class Status_Manager(ServiceNode):
                     self.error_out_data.error_code = 0
                     self.error_out_data.message = "底盘高度不合格, 请退出"
                     self.warning_pub.publish(self.error_out_data)
-                    print("底盘高度不合格, 请退出")
+                    #print("底盘高度不合格, 请退出")
+                    self.screen_state.state = SS['地盘']
+                    self.screen_cmd_pub.publish(self.screen_state)
+                    
 
     def rx_LC_state(self, data):
         with self.lock_UD_state_rx:
@@ -68,33 +76,43 @@ class Status_Manager(ServiceNode):
                         self.error_out_data.error_code = 0
                         self.error_out_data.message = "车辆合格，请下车"
                         self.warning_pub.publish(self.error_out_data)
-                        print("车辆合格，请下车")
+                        #print("车辆合格，请下车")
+                        self.screen_state.state = SS['OK']
+                        self.screen_cmd_pub.publish(self.screen_state)
                     elif self.LC_state_data.id == 0 and self.LC_state_data.state == True: #内光幕断开
                         self.area_state = AS['QUIT']
                         self.error_out_data.error_code = 0
                         self.error_out_data.message = "车辆超长，请退出"
                         self.warning_pub.publish(self.error_out_data)
-                        print("车辆超长，请退出")
+                        #print("车辆超长，请退出")
+                        self.screen_state.state = SS['超长']
+                        self.screen_cmd_pub.publish(self.screen_state)
                 elif self.area_state == AS['BACK']:
                     if self.LC_state_data.id == 0 and self.LC_state_data.state == False: #内光幕闭合
                         self.area_state = AS['FINISH']
                         self.error_out_data.error_code = 0
                         self.error_out_data.message = "车辆合格，请下车"
                         self.warning_pub.publish(self.error_out_data)
-                        print("车辆合格，请下车")
+                        #print("车辆合格，请下车")
+                        self.screen_state.state = SS['OK']
+                        self.screen_cmd_pub.publish(self.screen_state)
                 elif self.area_state == AS['FINISH']:
                     if self.LC_state_data.id == 1 and self.LC_state_data.state == True: #外光幕断开
                         self.area_state = AS['FORWARD']
                         self.error_out_data.error_code = 0
                         self.error_out_data.message = "请前进"
                         self.warning_pub.publish(self.error_out_data)
-                        print("请前进")
+                        #print("请前进")
+                        self.screen_state.state = SS['前进']
+                        self.screen_cmd_pub.publish(self.screen_state)
                     elif self.LC_state_data.id == 0 and self.LC_state_data.state == True: #内光幕断开
                         self.area_state = AS['BACK']
                         self.error_out_data.error_code = 0
                         self.error_out_data.message = "请后退"
                         self.warning_pub.publish(self.error_out_data)
-                        print("请后退")
+                        #print("请后退")
+                        self.screen_state.state = SS['后退']
+                        self.screen_cmd_pub.publish(self.screen_state)
                 
     def rx_door_cmd(self, data):
         with self.lock_door_cmd_data_rx:
@@ -106,7 +124,7 @@ class Status_Manager(ServiceNode):
                     self.error_out_data.error_code = 0
                     self.error_out_data.message = "存车中"
                     self.warning_pub.publish(self.error_out_data)
-                    print("存车中")
+                    #print("存车中")
                     break
 
     def get_ground_status(self):
@@ -144,7 +162,10 @@ class Status_Manager(ServiceNode):
                     self.error_out_data.error_code = 0
                     self.error_out_data.message = "车库空闲"
                     self.warning_pub.publish(self.error_out_data)
-                    print("车库空闲")
+                    #print("车库空闲")
+                    self.screen_state.state = SS['空闲']
+                    self.screen_cmd_pub.publish(self.screen_state)
+                    
             if self.area_state == AS['FREE'] and self.forward_start_time != '':
                 if time.time() - self.forward_start_time > 3.0:
                     self.area_state = AS['FORWARD']
@@ -152,7 +173,9 @@ class Status_Manager(ServiceNode):
                     self.error_out_data.error_code = 0
                     self.error_out_data.message = "请前进"
                     self.warning_pub.publish(self.error_out_data)
-                    print("请前进")
+                    #print("请前进")
+                    self.screen_state.state = SS['前进']
+                    self.screen_cmd_pub.publish(self.screen_state)
                     
 
 
