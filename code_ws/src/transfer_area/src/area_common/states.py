@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # IMPORTANT!!!!: state is encoded in ROS msg as uint8, so max value is 255!!!
 # this is sent by robot to reflect internal state
 
@@ -24,6 +26,5 @@ screen_state = {
     "超宽": 3,
     "空闲": 4,
     "超长": 5,
-    "底盘": 6,
-    "后退": 8
+    "底盘": 6
 }
