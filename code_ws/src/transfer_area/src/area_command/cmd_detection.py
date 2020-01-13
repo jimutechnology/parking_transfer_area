@@ -67,8 +67,8 @@ class DetectionCommand(Command):
 
 
     def reply_result(self):
-        message_text = "result: " + str(self.car_state_data.is_car_available)
-        if self.car_state_data.is_car_available == True and self.car_scanner_successful == True:
+        if self.car_scanner_successful == True and self.car_state_data.is_car_available == True:
+            message_text = "result: " + str(self.car_state_data.is_car_available)
             pose_in_map = self.getCarPose(self.car_state_data)
             message_text += "\n" + "scanX: " + str(pose_in_map.x)
             message_text += "\n" + "scanY: " + str(pose_in_map.y)
@@ -76,6 +76,7 @@ class DetectionCommand(Command):
             self.message = message_text
             self.Reply(state = CommandReply.STATE_FINISH)
         else:
+            message_text = "result: " + str(False)
             self.message = message_text
             self.Reply(state = CommandReply.STATE_ERROR, error_code=self.transform_error(self.car_state_data))
-        self.car_scanner_successful == False
+        self.car_scanner_successful = False

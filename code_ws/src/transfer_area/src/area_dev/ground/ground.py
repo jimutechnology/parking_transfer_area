@@ -17,6 +17,10 @@ class GroundNode(ServiceNode):
 		ServiceNode.__init__(self)
 		param = AreaParam()
 		self.setRate(0.1)
+		# thread locks
+		self.lock_get_ground = threading.Lock()
+		self.lock_scan_data = threading.Lock()
+		
 		self.Subscriber("scan", LaserScan, self.scan_rx, queue_size=1)
 		s = rospy.Service('get_ground_status', getGroundStatus, self.check_ground)
 		self.to_scan_ground = False
@@ -32,10 +36,6 @@ class GroundNode(ServiceNode):
 		self.min_ground_x = param.min_ground_x
 		self.max_ground_y = param.max_ground_y
 		self.min_ground_y = param.min_ground_y
-
-		# thread locks
-		self.lock_get_ground = threading.Lock()
-		self.lock_scan_data = threading.Lock()
 
 		# TODO
 		# self.scan_1 = 
@@ -79,7 +79,6 @@ class GroundNode(ServiceNode):
 		# Lidar 1, upside-down
 		phi = self.scan_1.angle_min
 		phi_step = self.scan_1.angle_increment
-		print phi, phi_step
 		l_x = self.lidar_pose_1[0]
 		l_y = self.lidar_pose_1[1]
 		l_yaw = self.lidar_pose_1[2]

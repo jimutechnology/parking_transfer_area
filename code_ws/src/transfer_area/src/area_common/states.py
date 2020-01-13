@@ -21,10 +21,18 @@ area_state = {
 
 
 screen_state = {
-    "前进": 1,
-    "OK":  2,
-    "超宽": 3,
-    "空闲": 4,
-    "超长": 5,
-    "底盘": 6
+    "FORWARD":  1,
+    "OK":       2,
+    "WIDE":     5,
+    "FREE":     0,
+    "LONG":     5,
+    "LOW":      6,
+    "SHORT":    5,
+    "NARROW":   5,
+    "LEFT":     3,
+    "RIGHT":    3,
+    "YAW":      3,
+    "STEERING": 3,
+    "BACKWARD": 3,
+    "LEAVE":    6
 }
