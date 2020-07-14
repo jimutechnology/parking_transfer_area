@@ -80,7 +80,7 @@ class PLC_Communication(ServiceNode):
     def write_data(self, unit, start_end, data_len, payload):
         message_command = WRITE_COMMAND + SUB_COMMAND + unit + start_end + data_len + payload
         command_len = int(data_len, 16) * 4 + 24
-        output_data = TX_HEAD + NETWORK_NUM + PLC_NUM + IO_NUM + STATION_NUM + command_len + CPU_TIMER + message_command
+        output_data = TX_HEAD + NETWORK_NUM + PLC_NUM + IO_NUM + STATION_NUM + str(command_len) + CPU_TIMER + message_command
         self.socketHandel.send(output_data)
         read_data = self.socketHandel.recv(512)
         print (read_data)
