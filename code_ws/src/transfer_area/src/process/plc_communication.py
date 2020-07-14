@@ -64,16 +64,17 @@ class PLC_Communication(ServiceNode):
         command_len = '0018'
         output_data = TX_HEAD + NETWORK_NUM + PLC_NUM + IO_NUM + STATION_NUM + command_len + CPU_TIMER + message_command
         self.socketHandel.send(output_data)
-        read_data = self.socketHandel.recv(512)
-        print (read_data)
+        rx_data = self.socketHandel.recv(512)
+        print (rx_data)
         recv_command = RX_HEAD + NETWORK_NUM + PLC_NUM + IO_NUM + STATION_NUM
-        if recv_command == read_data[0:14]:
-            recv_len = int(read_data[14:18], 16) + 18
-            if recv_len == len(read_data):
-                recv_data=[]
+        if recv_command == rx_data[0:14]:
+            recv_len = int(rx_data[14:18], 16) + 18
+            if recv_len == len(rx_data):
+                print (int(data_len,16))
+                recv_data=[3]
                 for i in range((recv_len-22)/4):
-                    recv_data[i] = int(read_data[22:26],16)
-                print ('receive data:', recv_data)
+                    recv_data[i] = int(rx_data[22+i*4:26+i*4],16)
+                print('receive data:', recv_data)
                 return recv_data
         print ('receive data failed')
         return ''
