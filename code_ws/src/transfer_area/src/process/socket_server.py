@@ -10,16 +10,18 @@ s.listen(5)
 
 ss, addr = s.accept()
 print 'got connected from',addr
-while not rospy.is_shutdown():
-    ra = ss.recv(512)
-    print ra
-    if ra[22]=='1':
-        ss.send('D00000FF03FF0000040000')
-    elif ra[22]=='0':
-        ss.send('D00000FF03FF0000100000123456784444')
-    else:
-        print("receive data error")
-    time.sleep(1)
-
-ss.close()
-s.close()
+while True:
+    try:
+        ra = ss.recv(512)
+        print ra
+        if ra[22]=='1':
+            ss.send('D00000FF03FF0000040000')
+        elif ra[22]=='0':
+            ss.send('D00000FF03FF0000100000123456784444')
+        else:
+            print("receive data error")
+        time.sleep(1)
+    except Excepting,e:
+        ss.close()
+        s.close()
+        break
