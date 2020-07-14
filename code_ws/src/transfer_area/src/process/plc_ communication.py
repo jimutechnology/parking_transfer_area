@@ -113,6 +113,9 @@ class PLC_Communication(ServiceNode):
             else:
                 print ("write data failed!")
             self.car_scanner_successful = False
+
+            rxd = self.read_data(D_UNIT, '0000', '0003')
+            print (rxd)
             
 
     def cleanup(self):
