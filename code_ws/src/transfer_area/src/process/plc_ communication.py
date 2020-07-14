@@ -79,8 +79,9 @@ class PLC_Communication(ServiceNode):
     
     def write_data(self, unit, start_end, data_len, payload):
         message_command = WRITE_COMMAND + SUB_COMMAND + unit + start_end + data_len + payload
-        command_len = int(data_len, 16) * 4 + 24
-        output_data = TX_HEAD + NETWORK_NUM + PLC_NUM + IO_NUM + STATION_NUM + str(command_len) + CPU_TIMER + message_command
+        command_len = hex(int(data_len, 16) * 4 + 24)
+        command_len = command_len.zfill(4)
+        output_data = TX_HEAD + NETWORK_NUM + PLC_NUM + IO_NUM + STATION_NUM + command_len + CPU_TIMER + message_command
         self.socketHandel.send(output_data)
         read_data = self.socketHandel.recv(512)
         print (read_data)
@@ -95,6 +96,7 @@ class PLC_Communication(ServiceNode):
         b=a[2:len(a)]
         c=b.zfill(4)
         return c
+
 
     def loop(self):
         if self.car_scanner_successful == True:
