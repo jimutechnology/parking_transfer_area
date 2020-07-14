@@ -21,7 +21,7 @@ while True:
         else:
             print("receive data error")
         time.sleep(1)
-    except Excepting,e:
+    except Exception,e:
         ss.close()
         s.close()
         break
