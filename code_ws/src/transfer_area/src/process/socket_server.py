@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import socket
+import time
 
 address = ('127.0.0.1', 31500)
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # s = socket.socket()
@@ -9,9 +10,16 @@ s.listen(5)
 
 ss, addr = s.accept()
 print 'got connected from',addr
-ra = ss.recv(512)
-print ra
-ss.send('D00000FF03FF0000040000')
+while not rospy.is_shutdown():
+    ra = ss.recv(512)
+    print ra
+    if ra[22]=='1':
+        ss.send('D00000FF03FF0000040000')
+    elif ra[22]=='0':
+        ss.send('D00000FF03FF0000100000123456784444')
+    else:
+        print("receive data error")
+    time.sleep(1)
 
 ss.close()
 s.close()

@@ -94,6 +94,10 @@ class PLC_Communication(ServiceNode):
             return False
             
     def float2str(self, data):
+        if data>65535:
+            data = 65535
+        elif data<0:
+            data = 0
         a=hex(int(data))
         b=a[2:len(a)]
         c=b.zfill(4)
