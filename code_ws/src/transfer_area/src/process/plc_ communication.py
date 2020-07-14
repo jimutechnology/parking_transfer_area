@@ -103,7 +103,7 @@ class PLC_Communication(ServiceNode):
     def loop(self):
         if self.car_scanner_successful == True:
             wb_data = self.float2str(self.car_info_data.length_wheelbase*1000)
-            ret = self.write_data(D_UNIT, '0000', '0004', wb_data)
+            ret = self.write_data(D_UNIT, '0000', '0001', wb_data)
             if ret==True:
                 print ("write data successful!")
             else:
