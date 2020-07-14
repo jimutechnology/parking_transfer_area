@@ -52,6 +52,7 @@ class PLC_Communication(ServiceNode):
         self.lock_rx_car_info = threading.Lock()
         self.car_info_data = CarInfo()
         self.Subscriber("car_info", CarInfo, self.rx_car_info)
+        self.car_scanner_successful = False
     
     def rx_car_info(self, data):
         with self.lock_rx_car_info:
