@@ -9,10 +9,9 @@ s.listen(5)
 
 ss, addr = s.accept()
 print 'got connected from',addr
-
-ss.send('byebye')
 ra = ss.recv(512)
 print ra
+ss.send('D00000FF03FF0000040000')
 
 ss.close()
 s.close()
