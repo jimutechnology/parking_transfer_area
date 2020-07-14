@@ -70,6 +70,7 @@ class PLC_Communication(ServiceNode):
         if recv_command == read_data[0:14]:
             recv_len = int(read_data[14:18], 16) + 18
             if recv_len == len(read_data):
+                recv_data=[]
                 for i in range((recv_len-22)/4):
                     recv_data[i] = int(read_data[22:26],16)
                 print ('receive data:', recv_data)
@@ -80,6 +81,7 @@ class PLC_Communication(ServiceNode):
     def write_data(self, unit, start_end, data_len, payload):
         message_command = WRITE_COMMAND + SUB_COMMAND + unit + start_end + data_len + payload
         command_len = hex(int(data_len, 16) * 4 + 24)
+        command_len = command_len[2:len(command_len)]
         command_len = command_len.zfill(4)
         output_data = TX_HEAD + NETWORK_NUM + PLC_NUM + IO_NUM + STATION_NUM + command_len + CPU_TIMER + message_command
         self.socketHandel.send(output_data)
