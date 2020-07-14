@@ -91,7 +91,7 @@ class PLC_Communication(ServiceNode):
             return False
             
     def float2str(self, data):
-        a=hex(round(data))
+        a=hex(int(data))
         b=a[2:len(a)]
         c=b.zfill(4)
         return c
