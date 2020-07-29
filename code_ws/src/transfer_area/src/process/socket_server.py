@@ -17,7 +17,7 @@ while True:
         if ra[22]=='1':
             ss.send('D00000FF03FF0000040000')
         elif ra[22]=='0':
-            ss.send('D00000FF03FF000000800001234')
+            ss.send('D00000FF03FF00000800001234')
         else:
             print("receive data error")
         time.sleep(1)

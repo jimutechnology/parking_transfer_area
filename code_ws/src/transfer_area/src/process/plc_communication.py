@@ -68,10 +68,10 @@ class PLC_Communication(ServiceNode):
         print (rx_data)
         recv_command = RX_HEAD + NETWORK_NUM + PLC_NUM + IO_NUM + STATION_NUM
         if recv_command == rx_data[0:14]:
-            recv_len = int(rx_data[14:18], 16) + 18
-            if recv_len == len(rx_data):
+            recv_len = int(rx_data[14:18], 16)
+            if recv_len == len(rx_data)-18:
                 recv_data=[]
-                for i in range((recv_len-22)/4):
+                for i in range((recv_len-4)/4):
                     recv_data.append(int(rx_data[22+i*4:26+i*4],16))
                 print('receive data successful')
                 return recv_data
