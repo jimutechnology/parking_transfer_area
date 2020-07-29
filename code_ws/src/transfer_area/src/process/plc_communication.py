@@ -40,6 +40,11 @@ SUB_COMMAND = '0000'
 M_UNIT = 'M*'
 D_UNIT = 'D*'
 
+FLAG_ADD = '000000'
+DATA_ADD = '000010'
+
+FLAG_LEN = '0001'
+DATA_LEN = '0001'
 class PLC_Communication(ServiceNode):
     def __init__(self):
         ServiceNode.__init__(self)
@@ -106,16 +111,16 @@ class PLC_Communication(ServiceNode):
 
     def loop(self):
         if self.car_scanner_successful == True:
-            rxd = self.read_data(D_UNIT, '000000', '0001')
+            rxd = self.read_data(D_UNIT, FLAG_ADD, FLAG_LEN)
             if rxd == 1:
                 print (rxd)
                 wb_data = self.float2str(self.car_info_data.length_wheelbase*1000)
-                ret = self.write_data(D_UNIT, '000000', '0001', wb_data)
+                ret = self.write_data(D_UNIT, DATA_ADD, DATA_LEN, wb_data)
                 if ret==True:
                     print ("write data successful!")
                 else:
                     print ("write data failed!")
-                ret = self.write_data(D_UNIT, '000000', '0001', wb_data)
+                ret = self.write_data(D_UNIT, FLAG_ADD, FLAG_LEN, self.float2str(0.0))
                 self.car_scanner_successful = False
             
             
