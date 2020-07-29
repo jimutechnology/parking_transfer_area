@@ -70,11 +70,10 @@ class PLC_Communication(ServiceNode):
         if recv_command == rx_data[0:14]:
             recv_len = int(rx_data[14:18], 16) + 18
             if recv_len == len(rx_data):
-                print (int(data_len,16))
-                recv_data=[3]
+                recv_data=[]
                 for i in range((recv_len-22)/4):
-                    recv_data[i] = int(rx_data[22+i*4:26+i*4],16)
-                print('receive data:', recv_data)
+                    recv_data.append(int(rx_data[22+i*4:26+i*4],16))
+                print('receive data successful')
                 return recv_data
         print ('receive data failed')
         return ''
@@ -107,16 +106,18 @@ class PLC_Communication(ServiceNode):
 
     def loop(self):
         if self.car_scanner_successful == True:
-            wb_data = self.float2str(self.car_info_data.length_wheelbase*1000)
-            ret = self.write_data(D_UNIT, '0000', '0001', wb_data)
-            if ret==True:
-                print ("write data successful!")
-            else:
-                print ("write data failed!")
-            self.car_scanner_successful = False
-
-            rxd = self.read_data(D_UNIT, '0000', '0003')
-            print (rxd)
+            rxd = self.read_data(D_UNIT, '000000', '0001')
+            if rxd == 1:
+                print (rxd)
+                wb_data = self.float2str(self.car_info_data.length_wheelbase*1000)
+                ret = self.write_data(D_UNIT, '000000', '0001', wb_data)
+                if ret==True:
+                    print ("write data successful!")
+                else:
+                    print ("write data failed!")
+                ret = self.write_data(D_UNIT, '000000', '0001', wb_data)
+                self.car_scanner_successful = False
+            
             
 
     def cleanup(self):
