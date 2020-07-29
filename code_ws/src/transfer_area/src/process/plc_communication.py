@@ -63,7 +63,7 @@ class PLC_Communication(ServiceNode):
         message_command = READ_COMMAND + SUB_COMMAND + unit + start_end + data_len
         command_len = '0018'
         output_data = TX_HEAD + NETWORK_NUM + PLC_NUM + IO_NUM + STATION_NUM + command_len + CPU_TIMER + message_command
-        self.socketHandel.send(output_data)
+        self.socketHandel.send(str.upper(output_data))
         rx_data = self.socketHandel.recv(512)
         print (rx_data)
         recv_command = RX_HEAD + NETWORK_NUM + PLC_NUM + IO_NUM + STATION_NUM
@@ -85,7 +85,7 @@ class PLC_Communication(ServiceNode):
         command_len = command_len[2:len(command_len)]
         command_len = command_len.zfill(4)
         output_data = TX_HEAD + NETWORK_NUM + PLC_NUM + IO_NUM + STATION_NUM + command_len + CPU_TIMER + message_command
-        self.socketHandel.send(output_data)
+        self.socketHandel.send(str.upper(output_data))
         read_data = self.socketHandel.recv(512)
         print (read_data)
         recv_command = RX_HEAD + NETWORK_NUM + PLC_NUM + IO_NUM + STATION_NUM + '00040000'
