@@ -6,15 +6,15 @@ area_param:
     pose_in_map: [25.247, -1.82, 1.57079633]
 
     # ground area to be cleared
-    max_ground_x: 5.0
-    min_ground_x: 1.0
-    max_ground_y: 2.0
-    min_ground_y: -2.0
+    max_ground_x: 4.0
+    min_ground_x: 2.0
+    max_ground_y: 1.0
+    min_ground_y: -1.0
 
 lidar_1:              # Lidar parameters of a lidar in the transfer area
   frame_id: "laser_1"        # frame_id of the lidar
-  pose: [3.0, -2.46, 1.57079633]  # pose [x, y, yaw] of the lidar w.r.t. {T} (transfer area frame)
+  pose: [3.0, -1.48, 1.57079633]  # pose [x, y, yaw] of the lidar w.r.t. {T} (transfer area frame)
 
 lidar_2:
   frame_id: "laser_2"
-  pose: [3.0, 2.46, -1.57079633]
+  pose: [3.0, 1.48, -1.57079633]
