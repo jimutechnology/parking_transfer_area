@@ -40,8 +40,8 @@ SUB_COMMAND = '0000'
 M_UNIT = 'M*'
 D_UNIT = 'D*'
 
-FLAG_ADD = '000000'
-DATA_ADD = '000010'
+FLAG_ADD = '009991'
+DATA_ADD = '009990'
 
 FLAG_LEN = '0001'
 DATA_LEN = '0001'
@@ -49,7 +49,7 @@ class PLC_Communication(ServiceNode):
     def __init__(self):
         ServiceNode.__init__(self)
         self.setRate(1) # no delay
-        self.socketAddress = ('127.0.0.1', 31500)
+        self.socketAddress = ('192.168.13.41', 1100)
         self.socketHandel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socketHandel.connect(self.socketAddress)
         print("socket connect successful!")
@@ -112,18 +112,15 @@ class PLC_Communication(ServiceNode):
     def loop(self):
         if self.car_scanner_successful == True:
             rxd = self.read_data(D_UNIT, FLAG_ADD, FLAG_LEN)
-            if rxd == 1:
-                print (rxd)
+            if rxd[0] == 1:
                 wb_data = self.float2str(self.car_info_data.length_wheelbase*1000)
                 ret = self.write_data(D_UNIT, DATA_ADD, DATA_LEN, wb_data)
                 if ret==True:
                     print ("write data successful!")
                 else:
                     print ("write data failed!")
-                ret = self.write_data(D_UNIT, FLAG_ADD, FLAG_LEN, self.float2str(0.0))
+                #ret = self.write_data(D_UNIT, FLAG_ADD, FLAG_LEN, self.float2str(0.0))
                 self.car_scanner_successful = False
-            
-            
 
     def cleanup(self):
         self.socketHandel.close()
