@@ -21,11 +21,7 @@ int main(int argc, char **argv)
     if (!carExtractorNode.Init())
         return -1;
     
-    while (ros::ok())
-    {
-        ros::spinOnce();
-        carExtractorNode.Loop();
-    }
+    ros::spin();
     
     return 0;
 }

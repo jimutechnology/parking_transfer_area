@@ -74,7 +74,9 @@ private:
   std::list<PointSet> point_sets;
 
   // Parameters
-  string p_model_path_;
+  string p_model_path;
+  string p_model_project;
+  string p_project_path;
   double p_distance_proportion_;
   double p_max_orientation;
   double p_max_wheels_distance;

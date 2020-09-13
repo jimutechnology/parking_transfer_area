@@ -14,6 +14,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include <iostream> 
 #include <string>
+#include <ros/package.h>
 using namespace std;
 using namespace car_scanner;
 using namespace obstacle_detector;
@@ -53,7 +54,9 @@ ObstacleExtractor::~ObstacleExtractor() {
 
 bool ObstacleExtractor::LoadParams() {
   
-  ros::param::param<std::string>("/obstacle_extractor/SVM_model_path", p_model_path_, "/home/ubuntu/parking_transfer_area/code_ws/src/car_scanner/conf/wheel_classifier.xml");
+  ros::param::param<std::string>("/obstacle_extractor/SVM_project_path", p_model_project, "car_scanner");
+  std::string p_project_path = ros::package::getPath(p_model_project);
+  ros::param::param<std::string>("/obstacle_extractor/SVM_model_path", p_model_path, "conf/wheel_classifier.xml");
   ros::param::param("/obstacle_extractor/max_group_dis", p_max_group_dis, 0.1);
   ros::param::param("/obstacle_extractor/max_tolerant_orientaion", p_max_orientation, 0.3);
   // ros::param::param("/obstacle_extractor/max_wheels_distance", p_max_wheels_distance, 1.8);
@@ -68,9 +71,9 @@ bool ObstacleExtractor::LoadParams() {
   ros::param::param<std::string>("/lidar_" + to_string(laser_id) + "/frame_id", p_frame_id_, "laser_1");
   wheel_array_id_ = p_frame_id_;
 
-  ros::param::param("/obstacle_extractor/distance_left", distance_left, 2.5);
-  ros::param::param("/obstacle_extractor/distance_right", distance_right, 2.5);
-  ros::param::param("/obstacle_extractor/distance_front", distance_front, 1.5);
+  ros::param::param("/lidar_" + to_string(laser_id) + "/distance_left", distance_left, 2.5);
+  ros::param::param("/lidar_" + to_string(laser_id) + "/distance_right", distance_right, 2.5);
+  ros::param::param("/lidar_" + to_string(laser_id) + "/distance_front", distance_front, 1.5);
   ros::param::param("/obstacle_extractor/min_angle", min_angle, -1.57);
   ros::param::param("/obstacle_extractor/max_angle", max_angle, 1.57);
 
@@ -159,7 +162,7 @@ void ObstacleExtractor::detectWheels(PointSet& tmp1, PointSet& tmp2)
  
   PointSet tmp;
   // // the SVM model path
-  string model_path = p_model_path_;
+  string model_path = p_project_path + string("/") + p_model_path;
   Classifier classifier;
   classifier.load(model_path);
   // select the two point sets which most likely are tires

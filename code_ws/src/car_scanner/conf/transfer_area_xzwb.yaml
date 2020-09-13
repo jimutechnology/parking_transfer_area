@@ -1,10 +1,27 @@
 lidar_1:              # Lidar parameters of a lidar in the transfer area
-  frame_id: "laser_2"        # frame_id of the lidar
-  pose: [3.0, +1.48, -1.57079633]  # pose [x, y, yaw] of the lidar w.r.t. {T} (transfer area frame)
-
+  pose: [3.0, -1.48, +1.57079633]  # pose [x, y, yaw] of the lidar w.r.t. {T} (transfer area frame)
+  # Below are also configuration for the launched lidar node
+  frame_id: "laser_1"       # frame_id of the lidar
+  min_ang: -1.5707963268    # minimum scanning angle
+  max_ang: 1.5707963268     # maximum scanning angle
+  hostname: "192.168.13.72" # IP address
+  port: "2112"              # port (following IP address)
+  # Below are wheel detection region for the lidar
+  distance_left:      2.5     # scan region of the lidar
+  distance_right:     2.5
+  distance_front:     2.5
 lidar_2:
-  frame_id: "laser_1"
-  pose: [3.0, -1.48, +1.57079633]
+  pose: [3.0, +1.48, -1.57079633]
+  # Below are also configuration for the launched lidar node
+  frame_id: "laser_2"       # frame_id of the lidar
+  min_ang: -1.5707963268    # minimum scanning angle
+  max_ang: 1.5707963268     # maximum scanning angle
+  hostname: "192.168.13.71" # IP address
+  port: "2112"              # port (following IP address)
+  # Below are wheel detection region for the lidar
+  distance_left:      2.5     # scan region of the lidar
+  distance_right:     2.5
+  distance_front:     2.5
 
 # TODO: parameters
 car_spec:              # spec limits for the car
