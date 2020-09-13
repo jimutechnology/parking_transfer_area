@@ -1,10 +1,10 @@
 lidar_1:              # Lidar parameters of a lidar in the transfer area
   frame_id: "laser_2"        # frame_id of the lidar
-  pose: [3.0, +1.48, -1.57079633]  # pose [x, y, yaw] of the lidar w.r.t. {T} (transfer area frame)
+  pose: [3.0, +2.46, -1.57079633]  # pose [x, y, yaw] of the lidar w.r.t. {T} (transfer area frame)
 
 lidar_2:
   frame_id: "laser_1"
-  pose: [3.0, -1.48, +1.57079633]
+  pose: [3.0, -2.46, +1.57079633]
 
 # TODO: parameters
 car_spec:              # spec limits for the car
