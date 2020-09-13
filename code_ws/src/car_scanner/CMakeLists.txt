@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   tf
+  roslib
 )
 
 ## System dependencies are found with CMake's conventions
@@ -183,6 +184,13 @@ add_dependencies(car_extractor_node
   car_scanner_gencpp
 )
 
+add_executable(tf_publisher
+  src/tf_publisher.cpp
+)
+add_dependencies(tf_publisher
+  car_scanner_gencpp
+)
+
 
 
 ## Rename C++ executable without prefix
@@ -208,6 +216,10 @@ target_link_libraries(obstacle_extractor_node
 )
 
 target_link_libraries(car_extractor_node
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(tf_publisher
   ${catkin_LIBRARIES}
 )
 
