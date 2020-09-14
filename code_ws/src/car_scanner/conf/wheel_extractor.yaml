@@ -7,7 +7,7 @@ obstacle_extractor:
     # min_wheels_distance: 1.25 # When the wheels distance is less than it, the robot cannot go through wheels
     size_mode: 0 # 0 means average, 1 means max, 2 means min
     range_min: 0.05 # The smallest range value of lidar data
-    range_max: 4.0 # The largest range value of lidar data
+    range_max: 5.0 # The largest range value of lidar data
     noise_threshold: 10 # the point cluster whose number of cloud points less than it will be considered as noise
     noise_dis: 0.05      # cloud point is considered part of an object if its distance from the object is within (noise_dis + error)
     
