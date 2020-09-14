@@ -14,6 +14,7 @@
 #include <vector>
 #include <tf/transform_broadcaster.h>
 #include <string>
+#include "math.h"
 
 using namespace std;
 
@@ -27,6 +28,8 @@ int main(int argc, char **argv)
     vector<double>  pose_lidar_2;
     string          frame_lidar_1;  // frame ID of lidar 1
     string          frame_lidar_2;
+    bool            b_lidar_upsidedown; // for both lidars
+    double          angle_roll_lidars;
     tf::TransformBroadcaster br;
     tf::Transform transform_lidar_1;
     tf::Transform transform_lidar_2;
@@ -38,6 +41,11 @@ int main(int argc, char **argv)
     ros::param::get("/lidar_2/pose", pose_lidar_2);
     ros::param::get("/lidar_1/frame_id", frame_lidar_1);
     ros::param::get("/lidar_2/frame_id", frame_lidar_2);
+    ros::param::get("/obstacle_extractor/b_lidar_upsidedown", b_lidar_upsidedown);
+    if (b_lidar_upsidedown)
+        angle_roll_lidars = M_PI;
+    else
+        angle_roll_lidars = 0.0;
 
     transform_lidar_1.setOrigin(tf::Vector3(pose_lidar_1[0], pose_lidar_1[1], 0.0));
     q.setRPY(0, 0, pose_lidar_1[2]);
