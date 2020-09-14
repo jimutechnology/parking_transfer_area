@@ -54,7 +54,7 @@ ObstacleExtractor::~ObstacleExtractor() {
 
 bool ObstacleExtractor::LoadParams() {
   
-  ros::param::param<std::string>("/obstacle_extractor/SVM_project_path", p_model_project, "car_scanner");
+  ros::param::param<std::string>("/obstacle_extractor/SVM_model_project", p_model_project, "car_scanner");
   std::string p_project_path = ros::package::getPath(p_model_project);
   ros::param::param<std::string>("/obstacle_extractor/SVM_model_path", p_model_path, "conf/wheel_classifier.xml");
   ros::param::param("/obstacle_extractor/max_group_dis", p_max_group_dis, 0.1);
