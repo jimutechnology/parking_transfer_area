@@ -27,6 +27,16 @@ public:
         ros::param::get("/lidar_2/frame_id", right_lidar_frame_id);
         ros::param::get("/lidar_1/pose", transform_lidar_1);
         ros::param::get("/lidar_2/pose", transform_lidar_2);
+
+        ros::param::get("/car_extractor/b_debug_on", b_debug_on);
+        ros::param::get("/car_extractor/wheel_length_option", wheel_length_option_str);
+        if (wheel_length_option_str == "MAX")
+            wheel_length_option = MAX;
+        else if (wheel_length_option_str == "AVERAGE")
+            wheel_length_option = AVERAGE;
+        else
+            wheel_length_option = MAX;  // by default
+
         b_init = true;
     }
 };

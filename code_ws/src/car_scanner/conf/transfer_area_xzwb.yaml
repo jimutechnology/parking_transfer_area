@@ -45,3 +45,6 @@ car_pose_limit:            # limits for the pose of the car
 para_default:            # some esimated defaul parameters
   wheel_length:       0.4    # length of a wheel -- at the height of 6~7 cm, [m]
   wheel_width:       0.2    # width of a wheel -- at the height of 6~7 cm, [m]
+
+car_extractor:
+  wheel_length_option:  "MAX"

@@ -34,7 +34,9 @@ public:
     CarExtractor(): b_available(false),
                     b_available_left(false),
                     b_available_right(false),
-                    b_init(false)
+                    b_init(false),
+                    b_debug_on(false),
+                    wheel_length_option(MAX)
                     {}
 
 protected:
@@ -42,12 +44,21 @@ protected:
     bool    b_available_right;
     bool    b_available;
     bool    b_init;                         // whether object initialized
+    bool    b_debug_on;                     // switch on debug output
 
     string  left_lidar_frame_id;            // frame id (string: e.g. lidar_1) of lidars
     string  right_lidar_frame_id;
 
     vector<double>  transform_lidar_1;      // transformation from transfer frame to lidar frame      
     vector<double>  transform_lidar_2;
+
+    enum    WheelLengthOption {
+        MAX,
+        AVERAGE,
+        MEDIAN
+    };
+    WheelLengthOption wheel_length_option;
+    string            wheel_length_option_str;
 
 public:
     void    LoadParam();                    // load parameters 
