@@ -1,0 +1,13 @@
+<launch>
+    <arg name="bag" />
+
+    <rosparam command="load" file="$(find car_scanner)/conf/transfer_area.yaml"/>
+    <rosparam command="load" file="$(find car_scanner)/conf/wheel_extractor.yaml"/>
+
+    <node name="car_extractor" pkg="car_scanner" type="car_extractor_node" output="screen" >
+        <param name="b_debug_on" type="bool" value="true" />
+    </node>
+    <node name="car_state_publisher" pkg="car_scanner" type="car_state_publisher" />
+
+    <node name="rosbag_replay" pkg="rosbag" type="play" args="$(arg bag) --topic /wheel_info" />
+</launch>
