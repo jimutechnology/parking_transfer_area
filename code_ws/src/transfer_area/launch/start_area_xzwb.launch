@@ -10,5 +10,5 @@
 
     <node name="lidar_1" pkg="sick_tim" type="sick_tim551_2050001" respawn="false" />
     <node name="lidar_2" pkg="sick_tim" type="sick_tim551_2050001" respawn="false" />   
-
+    <node name="record" pkg="rosbag" type="record" args="-a -o $(optenv ROS_ID 0) --split --size=50 --max-splits=10 -j "/>
 </launch>
