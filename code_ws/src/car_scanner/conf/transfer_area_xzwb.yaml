@@ -48,3 +48,4 @@ para_default:            # some esimated defaul parameters
 
 car_extractor:
   wheel_length_option:  "MAX"
+  b_debug_on:           false
