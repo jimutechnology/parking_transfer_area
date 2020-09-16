@@ -8,6 +8,7 @@ import copy
 
 from area_common import ServiceNode, RunService
 from car_scanner.msg import CarInfo
+from std_msgs.msg import Float64
 '''
 # 十六进制数据
 TX_HEAD = [0x50, 0x00]
@@ -48,7 +49,7 @@ DATA_LEN = '0001'
 class PLC_Communication(ServiceNode):
     def __init__(self):
         ServiceNode.__init__(self)
-        self.setRate(1) # no delay
+        self.setRate(50) # no delay
         self.socketAddress = ('192.168.13.41', 1100)
         self.socketHandel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socketHandel.connect(self.socketAddress)
@@ -58,6 +59,11 @@ class PLC_Communication(ServiceNode):
         self.car_info_data = CarInfo()
         self.Subscriber("car_info", CarInfo, self.rx_car_info)
         self.car_scanner_successful = False
+
+        self.length_wheelbase_buffer = []
+        self.data_length_wheelbase_filtered = Float64()
+        # For debug purpose only, filtered output, which PLC requests 
+        self.pub_length_wheelbase = self.Publisher("length_wheelbase_filtered", Float64, queue_size=5)
     
     def rx_car_info(self, data):
         with self.lock_rx_car_info:
@@ -108,12 +114,27 @@ class PLC_Communication(ServiceNode):
         c=b.zfill(4)
         return c
 
+    # Read n samples of length_wheelbase and return median
+    # This function is blocking
+    def wait_for_length_wheelbase_reading(self, n_samples):
+        self.length_wheelbase_buffer = []
+        while (len(self.length_wheelbase_buffer) < n_samples):
+            with self.lock_rx_car_info:
+                if self.car_scanner_successful:
+                    self.length_wheelbase_buffer.append(self.car_info_data.length_wheelbase)
+                    self.car_scanner_successful = False
+            time.sleep(0.01)
+        
+        self.length_wheelbase_buffer.sort()
+        return self.length_wheelbase_buffer[n_samples / 2]
+
 
     def loop(self):
         if self.car_scanner_successful == True:
             rxd = self.read_data(D_UNIT, FLAG_ADD, FLAG_LEN)
             if rxd[0] == 1:
-                wb_data = self.float2str(self.car_info_data.length_wheelbase*1000)
+                length_wheel_base_filtered = self.wait_for_length_wheelbase_reading(5)
+                wb_data = self.float2str(length_wheel_base_filtered*1000)
                 ret = self.write_data(D_UNIT, DATA_ADD, DATA_LEN, wb_data)
                 if ret==True:
                     print ("write data successful!")
@@ -121,6 +142,10 @@ class PLC_Communication(ServiceNode):
                     print ("write data failed!")
                 #ret = self.write_data(D_UNIT, FLAG_ADD, FLAG_LEN, self.float2str(0.0))
                 self.car_scanner_successful = False
+
+                # For debug purpose only
+                self.data_length_wheelbase_filtered.data = self.wait_for_length_wheelbase_reading(5)
+                self.pub_length_wheelbase.publish(self.data_length_wheelbase_filtered)
 
     def cleanup(self):
         self.socketHandel.close()
