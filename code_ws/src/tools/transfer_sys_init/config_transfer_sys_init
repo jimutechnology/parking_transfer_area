@@ -1,0 +1,4 @@
+#!/bin/bash
+sudo cp transfer_sys_init.service /etc/systemd/system/.
+sudo cp transfer_sys_init /usr/local/bin/.
+sudo systemctl enable transfer_sys_init

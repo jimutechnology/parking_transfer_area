@@ -1,0 +1,54 @@
+#!/bin/bash
+
+
+##modify access of power check pin（tx2's gpio）
+sudo chmod 776 /sys/class/gpio/export
+sudo chmod 776 /sys/class/gpio/unexport
+##init input gpio
+sudo echo 5 >> /sys/class/gpio/export
+sudo echo in >> /sys/class/gpio/gpio5/direction
+sudo echo 6 >> /sys/class/gpio/export
+sudo echo in >> /sys/class/gpio/gpio6/direction
+sudo echo 12 >> /sys/class/gpio/export
+sudo echo in >> /sys/class/gpio/gpio12/direction
+sudo echo 13 >> /sys/class/gpio/export
+sudo echo in >> /sys/class/gpio/gpio13/direction
+sudo echo 16 >> /sys/class/gpio/export
+sudo echo in >> /sys/class/gpio/gpio16/direction
+sudo echo 19 >> /sys/class/gpio/export
+sudo echo in >> /sys/class/gpio/gpio19/direction
+sudo echo 20 >> /sys/class/gpio/export
+sudo echo in >> /sys/class/gpio/gpio20/direction
+sudo echo 21 >> /sys/class/gpio/export
+sudo echo in >> /sys/class/gpio/gpio21/direction
+sudo echo 26 >> /sys/class/gpio/export
+sudo echo in >> /sys/class/gpio/gpio26/direction
+##init output gpio
+sudo echo 7 >> /sys/class/gpio/export
+sudo echo out >> /sys/class/gpio/gpio7/direction
+sudo echo 8 >> /sys/class/gpio/export
+sudo echo out >> /sys/class/gpio/gpio8/direction
+sudo echo 9 >> /sys/class/gpio/export
+sudo echo out >> /sys/class/gpio/gpio9/direction
+sudo echo 10 >> /sys/class/gpio/export
+sudo echo out >> /sys/class/gpio/gpio10/direction
+sudo echo 11 >> /sys/class/gpio/export
+sudo echo out >> /sys/class/gpio/gpio11/direction
+sudo echo 14 >> /sys/class/gpio/export
+sudo echo out >> /sys/class/gpio/gpio14/direction
+sudo echo 15 >> /sys/class/gpio/export
+sudo echo out >> /sys/class/gpio/gpio15/direction
+sudo echo 17 >> /sys/class/gpio/export
+sudo echo out >> /sys/class/gpio/gpio17/direction
+sudo echo 18 >> /sys/class/gpio/export
+sudo echo out >> /sys/class/gpio/gpio18/direction
+sudo echo 22 >> /sys/class/gpio/export
+sudo echo out >> /sys/class/gpio/gpio22/direction
+sudo echo 23 >> /sys/class/gpio/export
+sudo echo out >> /sys/class/gpio/gpio23/direction
+sudo echo 24 >> /sys/class/gpio/export
+sudo echo out >> /sys/class/gpio/gpio24/direction
+sudo echo 25 >> /sys/class/gpio/export
+sudo echo out >> /sys/class/gpio/gpio25/direction
+sudo echo 27 >> /sys/class/gpio/export
+sudo echo out >> /sys/class/gpio/gpio27/direction
