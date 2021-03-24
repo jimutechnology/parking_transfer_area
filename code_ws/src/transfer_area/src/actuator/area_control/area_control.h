@@ -77,6 +77,22 @@ struct Door_Ctrl {
     uint16_t time_clear_count;
 };
 
+
+typedef enum
+{
+  M_STOP = 0,
+  M_UP = 1,
+  M_DOWN = 2
+}motor_cmd;
+
+typedef enum
+{
+  D_FORWARD = 1,
+  D_OK = 2,
+  D_FORWARD_Q = 3,
+  D_BACK = 4
+}dispaly_cmd;
+
 typedef enum
 {
   DOOR_NULL = -1,
