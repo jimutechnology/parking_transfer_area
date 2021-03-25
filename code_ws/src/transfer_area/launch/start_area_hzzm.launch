@@ -1,0 +1,17 @@
+<launch>
+    <rosparam command="load" file="$(find transfer_area)/conf/area_param_hzzm.yaml"/>
+    <rosparam command="load" file="$(find car_scanner)/conf/transfer_area_hzzm.yaml"/>
+    <rosparam command="load" file="$(find car_scanner)/conf/wheel_extractor.yaml"/>
+    
+    <node name="wheel_extractor" pkg="car_scanner" type="obstacle_extractor_node"/>
+    <node name="car_extractor" pkg="car_scanner" type="car_extractor_node"/>
+    <node name="car_state_publisher" pkg="car_scanner" type="car_state_publisher" />
+    <node name="tf_publisher" pkg="car_scanner" type="tf_publisher" />
+
+    <node name="lidar_1" pkg="sick_tim" type="sick_tim551_2050001" respawn="false" />
+    <node name="lidar_2" pkg="sick_tim" type="sick_tim551_2050001" respawn="false" />   
+    <!-- node name="plc_communication" pkg="transfer_area" type="plc_communication.py" / -->
+    <node name="area_control" pkg="transfer_area" type="area_control"  output="screen" />
+
+    <node name="record" pkg="rosbag" type="record" args="-a -o $(optenv ROS_ID 0) --split --size=50 --max-splits=10 -j "/>
+</launch>

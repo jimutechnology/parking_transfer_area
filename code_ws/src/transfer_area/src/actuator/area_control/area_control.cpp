@@ -183,6 +183,7 @@ void AreaControl::motor_control(void)
 {
     if(M_LIMIT_UP->gpio_read(M_LIMIT_UP_PIN) == GPIO_VALUE_LOW || M_LIMIT_DOWN->gpio_read(M_LIMIT_DOWN_PIN) == GPIO_VALUE_LOW || m_cmd == M_STOP)// && M_LIMIT_DOWN->gpio_read(M_LIMIT_DOWN_PIN) == GPIO_VALUE_HIGH)
     {
+        printf("motor limit up tigger\r\n");
         MOTOR_UP->gpio_write(MOTOR_UP_PIN,GPIO_VALUE_LOW);
         MOTOR_DOWN->gpio_write(MOTOR_DOWN_PIN,GPIO_VALUE_LOW);
         m_cmd = M_STOP;
@@ -276,6 +277,43 @@ void AreaControl::update_ez_screen_state(void)
 
 void AreaControl::area_cmd_update(void)
 {
+    static uint16_t cnt = 0;
+    cnt++;
+    // m_cmd = M_STOP;
+    // d_cmd = D_FORWARD;
+    if(cnt > 500)
+    {
+        cnt = 0;
+        if(m_cmd == M_STOP)
+        {
+            m_cmd = M_UP;
+        }
+        else if(m_cmd == M_UP)
+        {
+            m_cmd = M_DOWN;
+        }
+        else if(m_cmd == M_DOWN)
+        {
+            m_cmd = M_STOP;
+        }
+
+        if(d_cmd == D_FORWARD)
+        {
+            d_cmd = D_OK;
+        }
+        else if(d_cmd == D_OK)
+        {
+            d_cmd = D_FORWARD_Q;
+        }
+        else if(d_cmd == D_FORWARD_Q)
+        {
+            d_cmd = D_BACK;
+        }
+        else if(d_cmd == D_BACK)
+        {
+            d_cmd = D_FORWARD;
+        }
+    }
 
 }
 
@@ -297,7 +335,7 @@ void AreaControl::run(void)
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, AREA_CONTROL);
-
+    ros::NodeHandle nh("");
     ros::Rate r(100);
 
     AreaControl area_ctrl;
