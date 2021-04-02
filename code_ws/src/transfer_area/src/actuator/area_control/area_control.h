@@ -95,6 +95,24 @@ typedef enum
 
 typedef enum
 {
+  FORWARD = 1,
+  OK = 2,
+  WIDE = 5,
+  FREE = 0,
+  LONG = 5,
+  LOW  = 6,
+  SHORT = 5,
+  NARROW = 5,
+  LEFT = 3,
+  RIGHT = 3,
+  YAW  = 3,
+  STEERING = 3,
+  BACKWARD  = 3,
+  LEAVE = 6
+}screen_state;
+
+typedef enum
+{
   DOOR_NULL = -1,
   DOOR_OPENED = 0,
   DOOR_CLOSED = 1

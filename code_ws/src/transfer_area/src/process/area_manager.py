@@ -51,7 +51,7 @@ class Detection_Car(ServiceNode):
     
     def execute(self):
         self.get_ground_status()
-        self.get_doorstate()
+        ##self.get_doorstate()
         self.dock_state.header = copy.deepcopy(getHeader())
         self.dock_status_pub.publish(self.dock_state)
         if self.dock_state.area_state == DockState.EMPTY and self.car_scanner_successful == False:

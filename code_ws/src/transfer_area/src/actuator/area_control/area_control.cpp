@@ -9,6 +9,8 @@
 #include "area_control.h"
 #include "std_msgs/String.h"
 #include "transfer_area/InfoOut.h"
+#include "transfer_area/LightCurtainState.h"
+#include "transfer_area/ScreenCmd.h"
 #include "car_scanner/CarInfo.h"
 #include "car_scanner/CarState.h"
 #include "../../actuator/gpio/gpio.h"
@@ -29,7 +31,7 @@ using namespace std;
 #define  DISPLAY_A1_PIN         24
 #define  DISPLAY_A2_PIN         9
 #define  DISPLAY_A3_PIN         11
-#define  DISPLAY_A4_PIN         7
+#define  DISPLAY_A4_PIN         25   //7   /*由于树梅派gpio7被用作spi，暂时使用gpio25（外提示屏的3脚代替）*/
 
 #define  M_LIMIT_UP_PIN_STR     "20"
 #define  M_LIMIT_DOWN_PIN_STR   "26"
@@ -40,7 +42,7 @@ using namespace std;
 #define  DISPLAY_A1_PIN_STR     "24"
 #define  DISPLAY_A2_PIN_STR     "9"
 #define  DISPLAY_A3_PIN_STR     "11"
-#define  DISPLAY_A4_PIN_STR     "7"
+#define  DISPLAY_A4_PIN_STR     "25"    //7   /*由于树梅派gpio7被用作spi，暂时使用gpio25（外提示屏的3脚代替）*/
 
 using namespace car_scanner;
 using namespace std;
@@ -52,10 +54,17 @@ public:
 	ros::Publisher      error_info_pub;
     ros::Publisher      warning_info_pub;
 
+    ros::Publisher      light_curtain_pub;
+
     ros::Subscriber     car_state_sub;
     ros::Subscriber     car_info_sub;
-   
+    ros::Subscriber     screen_cmd_sub;
+
+    transfer_area::LightCurtainState light_curtain_data;
+    // transfer_area::ScreenCmd screen_data;
+
     motor_cmd m_cmd = M_STOP;
+    bool is_motor_outside = false;
     dispaly_cmd d_cmd = D_FORWARD_Q;
     bool ez_screen_f = false;
     bool ez_screen_b = false;
@@ -124,6 +133,7 @@ public:
     void motor_control(void);
     void display_control(void);
     void update_ez_screen_state(void);
+    void rx_screen_cmd(const transfer_area::ScreenCmd msg);
 
 };
 
@@ -149,9 +159,12 @@ bool AreaControl::AreaControl_Init(void)
     error_info_pub = nh.advertise<transfer_area::InfoOut>(string("error_info"), 3);
 	warning_info_pub = nh.advertise<transfer_area::InfoOut>(string("warning_info"), 3);
 
-
+    light_curtain_pub = nh.advertise<transfer_area::LightCurtainState>(string("light_curtain_state"), 3);
     car_state_sub = nh.subscribe("car_state",  5, &AreaControl::rx_car_state_data, this);
     car_info_sub = nh.subscribe("car_info",  5, &AreaControl::rx_car_info_data, this);
+
+    screen_cmd_sub = nh.subscribe("screen_cmd",  5, &AreaControl::rx_screen_cmd, this);
+
 
 	return true;
 }
@@ -179,14 +192,49 @@ void AreaControl::rx_car_state_data(const car_scanner::CarState msg)
     
 }
 
+void AreaControl::rx_screen_cmd(const transfer_area::ScreenCmd msg)
+{
+    if(msg.id == 0)
+    {
+        if(msg.state == 0)
+        {
+            d_cmd = D_FORWARD_Q;
+            if(!is_motor_outside)
+                m_cmd = M_UP;
+        }
+        if(msg.state == 1)
+        {
+            d_cmd = D_FORWARD;
+            if(!is_motor_outside)
+                m_cmd = M_UP;
+        }
+        else if(msg.state == 2)
+        {
+            d_cmd = D_OK;
+            if(is_motor_outside)
+                m_cmd = M_DOWN;
+        }
+        else if(msg.state == 3 || msg.state == 5 || msg.state == 6)
+        {
+            d_cmd = D_BACK;
+        }
+    }
+}
+
 void AreaControl::motor_control(void)
 {
-    if(M_LIMIT_UP->gpio_read(M_LIMIT_UP_PIN) == GPIO_VALUE_LOW || M_LIMIT_DOWN->gpio_read(M_LIMIT_DOWN_PIN) == GPIO_VALUE_LOW || m_cmd == M_STOP)// && M_LIMIT_DOWN->gpio_read(M_LIMIT_DOWN_PIN) == GPIO_VALUE_HIGH)
+    bool is_up_limit_active = M_LIMIT_UP->gpio_read(M_LIMIT_UP_PIN) == GPIO_VALUE_LOW;
+    bool is_down_limit_active = M_LIMIT_DOWN->gpio_read(M_LIMIT_DOWN_PIN) == GPIO_VALUE_LOW;
+    if(is_up_limit_active || is_down_limit_active || m_cmd == M_STOP)// && M_LIMIT_DOWN->gpio_read(M_LIMIT_DOWN_PIN) == GPIO_VALUE_HIGH)
     {
         printf("motor limit up tigger\r\n");
         MOTOR_UP->gpio_write(MOTOR_UP_PIN,GPIO_VALUE_LOW);
         MOTOR_DOWN->gpio_write(MOTOR_DOWN_PIN,GPIO_VALUE_LOW);
         m_cmd = M_STOP;
+        if(is_up_limit_active && !is_down_limit_active)
+            is_motor_outside = true;
+        if(!is_up_limit_active &&  is_down_limit_active)
+            is_motor_outside = false;
         return;
     }
     if(m_cmd == M_UP)
@@ -241,17 +289,26 @@ void AreaControl::update_ez_screen_state(void)
         usleep(15000);//15ms
         if(GPIO_VALUE_LOW == EZ_SCREEN_F->gpio_read(EZ_SCREEN_F_PIN))
         {
+            light_curtain_data.id = 1;
+            light_curtain_data.state = true;
+            light_curtain_pub.publish(light_curtain_data);
             ez_screen_f = true;
             printf("check screen at outside\r\n"); 
         }
         else
         {
+            light_curtain_data.id = 1;
+            light_curtain_data.state = false;
+            light_curtain_pub.publish(light_curtain_data);
             ez_screen_f = false;
         }
         
     }
     else
     {
+        light_curtain_data.id = 1;
+        light_curtain_data.state = false;
+        light_curtain_pub.publish(light_curtain_data);
         ez_screen_f = false;
     }
 
@@ -260,17 +317,26 @@ void AreaControl::update_ez_screen_state(void)
         usleep(15000);//15ms
         if(GPIO_VALUE_LOW == EZ_SCREEN_B->gpio_read(EZ_SCREEN_B_PIN))
         {
+            light_curtain_data.id = 0;
+            light_curtain_data.state = true;
+            light_curtain_pub.publish(light_curtain_data);
             ez_screen_b = true;
             printf("check screen at inside\r\n"); 
         }
         else
         {
+            light_curtain_data.id = 0;
+            light_curtain_data.state = false;
+            light_curtain_pub.publish(light_curtain_data);
             ez_screen_b = false;
         }
         
     }
     else
     {
+        light_curtain_data.id = 0;
+        light_curtain_data.state = false;
+        light_curtain_pub.publish(light_curtain_data);
         ez_screen_b = false;
     }
 }
@@ -324,7 +390,8 @@ void AreaControl::run(void)
 
     update_ez_screen_state();
 
-    area_cmd_update();
+    //gpio test
+    // area_cmd_update();
 
     display_control();
     motor_control();

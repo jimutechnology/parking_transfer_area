@@ -121,7 +121,7 @@ public:
         fd = open(path, O_WRONLY);
         if (fd < 0) 
         {
-            printf("Failed to open gpio value for writing!\n");
+            printf("Failed to open gpio%d value for writing!\n",pin);
             return -1;
         }
 

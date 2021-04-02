@@ -1,6 +1,6 @@
 area_param:
     area_id: 1
-    mqtt_server: "192.168.100.2"
+    mqtt_server: "192.168.100.200"
     enter_car: True
 
     pose_in_map: [25.247, -1.82, 1.57079633]
