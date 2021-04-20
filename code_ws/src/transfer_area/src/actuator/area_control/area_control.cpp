@@ -227,7 +227,7 @@ void AreaControl::motor_control(void)
     bool is_down_limit_active = M_LIMIT_DOWN->gpio_read(M_LIMIT_DOWN_PIN) == GPIO_VALUE_LOW;
     if(is_up_limit_active || is_down_limit_active || m_cmd == M_STOP)// && M_LIMIT_DOWN->gpio_read(M_LIMIT_DOWN_PIN) == GPIO_VALUE_HIGH)
     {
-        printf("motor limit up tigger\r\n");
+        // printf("motor limit up tigger\r\n");
         MOTOR_UP->gpio_write(MOTOR_UP_PIN,GPIO_VALUE_LOW);
         MOTOR_DOWN->gpio_write(MOTOR_DOWN_PIN,GPIO_VALUE_LOW);
         m_cmd = M_STOP;
@@ -293,7 +293,7 @@ void AreaControl::update_ez_screen_state(void)
             light_curtain_data.state = true;
             light_curtain_pub.publish(light_curtain_data);
             ez_screen_f = true;
-            printf("check screen at outside\r\n"); 
+            // printf("check screen at outside\r\n"); 
         }
         else
         {
@@ -321,7 +321,7 @@ void AreaControl::update_ez_screen_state(void)
             light_curtain_data.state = true;
             light_curtain_pub.publish(light_curtain_data);
             ez_screen_b = true;
-            printf("check screen at inside\r\n"); 
+            // printf("check screen at inside\r\n"); 
         }
         else
         {
