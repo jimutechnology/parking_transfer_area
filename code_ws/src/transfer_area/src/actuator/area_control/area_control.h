@@ -15,50 +15,7 @@
 using namespace std;
 // pin list
 
-//光幕
-#define  EZ_SCREEN_INSIDE                       5
-#define  EZ_SCREEN_OUTSIDE                      19
 
-//防夹
-#define  CLAMP_INSIDE                           6
-#define  CLAMP_OUTSIDE                          16
-
-//限位开关
-#define  LIMIT_UP_INSIDE                        13
-#define  LIMIT_UP_OUTSIDE                       20
-
-#define  LIMIT_DOWN_INSIDE                      12
-#define  LIMIT_DOWN_OUTSIDE                     26
-
-#define DOOR_OUTSIDE_OPEN_GPIO_PIN				15
-#define DOOR_OUTSIDE_CLOSE_GPIO_PIN				22
-#define DOOR_OUTSIDE_STOP_GPIO_PIN				18
-
-#define DOOR_INSIDE_OPEN_GPIO_PIN				14
-#define DOOR_INSIDE_CLOSE_GPIO_PIN				27
-#define DOOR_INSIDE_STOP_GPIO_PIN				17
-
-#define INSIDE_DISPLAY_PIN_1    				24
-#define INSIDE_DISPLAY_PIN_2    				9
-#define INSIDE_DISPLAY_PIN_3    				11
-#define INSIDE_DISPLAY_PIN_4    				7
-
-#define OUTSIDE_DISPLAY_PIN_1    				23
-#define OUTSIDE_DISPLAY_PIN_2    				10
-#define OUTSIDE_DISPLAY_PIN_3    				25
-#define OUTSIDE_DISPLAY_PIN_4    				8
-
-#define CHASSIS_CHECK                           21
-
-#define CMD_TIMEOUT_VALUE       15*1000     //25*1000ms
-
-#define DOOR_ACTION_OPEN    0
-#define DOOR_ACTION_CLOSE   1
-#define DOOR_ACTION_STOP    2
-#define DOOR_OUTSIDE        0
-#define DOOR_INSIDE         1
-
-#define DOOR_NUM 2
 
 struct Sensor_State {
     bool ez_screen;

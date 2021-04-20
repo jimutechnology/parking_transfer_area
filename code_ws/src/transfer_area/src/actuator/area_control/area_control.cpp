@@ -23,9 +23,9 @@ using namespace std;
 #define  GPIO_VALUE_LOW         0
 
 #define  M_LIMIT_UP_PIN         20
-#define  M_LIMIT_DOWN_PIN       26
-#define  EZ_SCREEN_F_PIN        19
-#define  EZ_SCREEN_B_PIN        5
+#define  M_LIMIT_DOWN_PIN       26   //触发是低电平
+#define  EZ_SCREEN_INSIDE_PIN   19
+#define  EZ_SCREEN_OUTSIDE_PIN  5
 #define  MOTOR_UP_PIN           15
 #define  MOTOR_DOWN_PIN         22
 #define  DISPLAY_A1_PIN         24
@@ -35,8 +35,8 @@ using namespace std;
 
 #define  M_LIMIT_UP_PIN_STR     "20"
 #define  M_LIMIT_DOWN_PIN_STR   "26"
-#define  EZ_SCREEN_F_PIN_STR    "19"
-#define  EZ_SCREEN_B_PIN_STR    "5"
+#define  EZ_SCREEN_INSIDE_PIN_STR    "19"
+#define  EZ_SCREEN_OUTSIDE_PIN_STR    "5"
 #define  MOTOR_UP_PIN_STR       "15"
 #define  MOTOR_DOWN_PIN_STR     "22"
 #define  DISPLAY_A1_PIN_STR     "24"
@@ -74,8 +74,8 @@ public:
     // intput
     Gpio *M_LIMIT_UP = nullptr;
 	Gpio *M_LIMIT_DOWN = nullptr;
-    Gpio *EZ_SCREEN_F = nullptr;
-	Gpio *EZ_SCREEN_B = nullptr;
+    Gpio *EZ_SCREEN_OUTSIDE = nullptr;
+	Gpio *EZ_SCREEN_INSIDE = nullptr;
 
     // output
     Gpio *MOTOR_UP = nullptr;
@@ -93,8 +93,8 @@ public:
     {
 		M_LIMIT_UP = new Gpio(M_LIMIT_UP_PIN_STR);
 		M_LIMIT_DOWN = new Gpio(M_LIMIT_DOWN_PIN_STR);
-        EZ_SCREEN_F = new Gpio(EZ_SCREEN_F_PIN_STR);
-        EZ_SCREEN_B = new Gpio(EZ_SCREEN_B_PIN_STR);
+        EZ_SCREEN_OUTSIDE = new Gpio(EZ_SCREEN_F_PIN_STR);
+        EZ_SCREEN_INSIDE = new Gpio(EZ_SCREEN_B_PIN_STR);
 
         MOTOR_UP = new Gpio(MOTOR_UP_PIN_STR);
         MOTOR_DOWN = new Gpio(MOTOR_DOWN_PIN_STR);
@@ -109,8 +109,8 @@ public:
 	{
         delete M_LIMIT_UP;
         delete M_LIMIT_DOWN;
-        delete EZ_SCREEN_F;
-        delete EZ_SCREEN_B;
+        delete EZ_SCREEN_OUTSIDE;
+        delete EZ_SCREEN_INSIDE;
         delete MOTOR_UP;
         delete MOTOR_DOWN;
         delete DISPLAY_A1;
@@ -284,10 +284,10 @@ void AreaControl::display_control(void)
 
 void AreaControl::update_ez_screen_state(void)
 {
-    if(GPIO_VALUE_LOW == EZ_SCREEN_F->gpio_read(EZ_SCREEN_F_PIN))         //前门光幕
+    if(GPIO_VALUE_LOW == EZ_SCREEN_OUTSIDE->gpio_read(EZ_SCREEN_OUTSIDE_PIN))         //前门光幕
     {
         usleep(15000);//15ms
-        if(GPIO_VALUE_LOW == EZ_SCREEN_F->gpio_read(EZ_SCREEN_F_PIN))
+        if(GPIO_VALUE_LOW == EZ_SCREEN_OUTSIDE->gpio_read(EZ_SCREEN_OUTSIDE_PIN))
         {
             light_curtain_data.id = 1;
             light_curtain_data.state = true;
@@ -312,10 +312,10 @@ void AreaControl::update_ez_screen_state(void)
         ez_screen_f = false;
     }
 
-    if(GPIO_VALUE_LOW == EZ_SCREEN_B->gpio_read(EZ_SCREEN_B_PIN))         //后门光幕
+    if(GPIO_VALUE_LOW == EZ_SCREEN_INSIDE->gpio_read(EZ_SCREEN_INSIDE_PIN))         //后门光幕
     {
         usleep(15000);//15ms
-        if(GPIO_VALUE_LOW == EZ_SCREEN_B->gpio_read(EZ_SCREEN_B_PIN))
+        if(GPIO_VALUE_LOW == EZ_SCREEN_INSIDE->gpio_read(EZ_SCREEN_INSIDE_PIN))
         {
             light_curtain_data.id = 0;
             light_curtain_data.state = true;
