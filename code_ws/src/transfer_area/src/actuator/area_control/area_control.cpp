@@ -93,8 +93,8 @@ public:
     {
 		M_LIMIT_UP = new Gpio(M_LIMIT_UP_PIN_STR);
 		M_LIMIT_DOWN = new Gpio(M_LIMIT_DOWN_PIN_STR);
-        EZ_SCREEN_OUTSIDE = new Gpio(EZ_SCREEN_F_PIN_STR);
-        EZ_SCREEN_INSIDE = new Gpio(EZ_SCREEN_B_PIN_STR);
+        EZ_SCREEN_OUTSIDE = new Gpio(EZ_SCREEN_OUTSIDE_PIN_STR);
+        EZ_SCREEN_INSIDE = new Gpio(EZ_SCREEN_INSIDE_PIN_STR);
 
         MOTOR_UP = new Gpio(MOTOR_UP_PIN_STR);
         MOTOR_DOWN = new Gpio(MOTOR_DOWN_PIN_STR);
