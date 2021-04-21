@@ -1,5 +1,5 @@
 lidar_1:              # Lidar parameters of a lidar in the transfer area
-  pose: [2.995, -2.365, +1.57079633]  # pose [x, y, yaw] of the lidar w.r.t. {T} (transfer area frame)
+  pose: [2.995, 2.365, -1.57079633]  # pose [x, y, yaw] of the lidar w.r.t. {T} (transfer area frame)
   # Below are also configuration for the launched lidar node
   frame_id: "laser_1"       # frame_id of the lidar
   min_ang: -1.5707963268    # minimum scanning angle
@@ -11,7 +11,7 @@ lidar_1:              # Lidar parameters of a lidar in the transfer area
   distance_right:     2.1
   distance_front:     1.9
 lidar_2:
-  pose: [2.995, +2.35, -1.53579633]
+  pose: [2.995, -2.35, 1.53579633]
   # Below are also configuration for the launched lidar node
   frame_id: "laser_2"       # frame_id of the lidar
   min_ang: -1.5707963268    # minimum scanning angle
