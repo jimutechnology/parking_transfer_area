@@ -44,6 +44,26 @@ typedef enum
 
 typedef enum
 {
+  M_POSITION_UNKNOWN = 0,
+  M_POSITION_UP = 1,
+  M_POSITION_MID = 2,
+  M_POSITION_DOWN = 3
+}motor_poistion;
+
+typedef enum
+{
+STATE_EMPTY    = 0,
+STATE_READLY   = 1,
+STATE_SENDED   = 2,
+STATE_RUNNING  = 3,
+STATE_PREFETCH = 4,
+STATE_FINISH   = 5,
+STATE_ERROR    = 6,
+STATE_TIMEOUT  = 7
+}cmd_state;
+
+typedef enum
+{
   D_FORWARD = 1,
   D_OK = 2,
   D_FORWARD_Q = 3,

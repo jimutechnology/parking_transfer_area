@@ -64,6 +64,8 @@ public:
     // transfer_area::ScreenCmd screen_data;
 
     motor_cmd m_cmd = M_STOP;
+    bool delay_flag = false;
+    motor_poistion m_pos = M_POSITION_UNKNOWN;
     bool is_motor_outside = false;
     dispaly_cmd d_cmd = D_FORWARD_Q;
     bool ez_screen_f = false;
@@ -86,7 +88,11 @@ public:
     Gpio *DISPLAY_A3 = nullptr;     //yellow-forward-quiet
 	Gpio *DISPLAY_A4 = nullptr;     //back
 
-    
+    bool is_up_limit_active = M_LIMIT_UP->gpio_read(M_LIMIT_UP_PIN) == GPIO_VALUE_LOW;
+    bool is_down_limit_active = M_LIMIT_DOWN->gpio_read(M_LIMIT_DOWN_PIN) == GPIO_VALUE_LOW;
+    bool is_up_limit_active_last = is_up_limit_active;
+    bool is_down_limit_active_last = is_down_limit_active;
+    cmd_state c_state = STATE_EMPTY;
 
 public:
     AreaControl()
@@ -134,6 +140,7 @@ public:
     void display_control(void);
     void update_ez_screen_state(void);
     void rx_screen_cmd(const transfer_area::ScreenCmd msg);
+    motor_poistion update_motor_position(void);
 
 };
 
@@ -199,20 +206,23 @@ void AreaControl::rx_screen_cmd(const transfer_area::ScreenCmd msg)
         if(msg.state == 0)
         {
             d_cmd = D_FORWARD_Q;
-            if(!is_motor_outside)
-                m_cmd = M_UP;
+            c_state = STATE_RUNNING;
+            m_cmd = M_UP;
+            delay_flag = true;
         }
         if(msg.state == 1)
         {
             d_cmd = D_FORWARD;
-            if(!is_motor_outside)
-                m_cmd = M_UP;
+            c_state = STATE_RUNNING;
+            m_cmd = M_UP;
+            delay_flag = true;
         }
         else if(msg.state == 2)
         {
             d_cmd = D_OK;
-            if(is_motor_outside)
-                m_cmd = M_DOWN;
+            c_state = STATE_RUNNING;
+            m_cmd = M_DOWN;
+            delay_flag = true;
         }
         else if(msg.state == 3 || msg.state == 5 || msg.state == 6)
         {
@@ -221,31 +231,90 @@ void AreaControl::rx_screen_cmd(const transfer_area::ScreenCmd msg)
     }
 }
 
-void AreaControl::motor_control(void)
+motor_poistion AreaControl::update_motor_position(void)
 {
-    bool is_up_limit_active = M_LIMIT_UP->gpio_read(M_LIMIT_UP_PIN) == GPIO_VALUE_LOW;
-    bool is_down_limit_active = M_LIMIT_DOWN->gpio_read(M_LIMIT_DOWN_PIN) == GPIO_VALUE_LOW;
-    if(is_up_limit_active || is_down_limit_active || m_cmd == M_STOP)// && M_LIMIT_DOWN->gpio_read(M_LIMIT_DOWN_PIN) == GPIO_VALUE_HIGH)
+    is_up_limit_active_last = is_up_limit_active;
+    is_down_limit_active_last = is_down_limit_active;
+    is_up_limit_active = M_LIMIT_UP->gpio_read(M_LIMIT_UP_PIN) == GPIO_VALUE_LOW;
+    is_down_limit_active = M_LIMIT_DOWN->gpio_read(M_LIMIT_DOWN_PIN) == GPIO_VALUE_LOW;
+
+    // 上下限位同时跳变，异常情况，无法确定位置
+    if((is_up_limit_active_last != is_up_limit_active) && (is_down_limit_active_last != is_down_limit_active))
+        m_pos = M_POSITION_UNKNOWN;//error
+    else if(is_up_limit_active_last != is_up_limit_active)
+    {
+        // 上限位由deactive-->active 
+        if(is_up_limit_active)
+            m_pos = M_POSITION_UP; 
+        // 上限位由active-->deactive 
+    }
+    else if(is_down_limit_active_last != is_down_limit_active)
+    {
+        // 下限位由deactive-->active   
+        if(is_down_limit_active)
+            m_pos = M_POSITION_DOWN;
+        // 下限位由active-->deactive  
+    }
+    else if(is_up_limit_active && !is_down_limit_active)
+    {
+        m_pos = M_POSITION_UP;
+    }
+    else if(!is_up_limit_active && is_down_limit_active)
+    {
+        m_pos = M_POSITION_DOWN;
+    }
+    // 上 下限位都deactive
+    else if((!is_up_limit_active) && (!is_down_limit_active))
+    {
+        m_pos = M_POSITION_MID;
+    }
+
+    return m_pos;
+}
+void AreaControl::motor_control(void)
+{ 
+    update_motor_position();
+
+    
+    if(c_state != STATE_RUNNING || (is_up_limit_active && is_down_limit_active) || (m_pos == M_POSITION_DOWN && m_cmd == M_DOWN) || (m_pos == M_POSITION_UP && m_cmd == M_UP))
+    // if((is_up_limit_active && is_down_limit_active) /*|| (m_cmd == M_STOP) */|| ((is_up_limit_active_last != is_up_limit_active) && is_up_limit_active) || ((is_down_limit_active_last != is_down_limit_active) && is_down_limit_active))// && M_LIMIT_DOWN->gpio_read(M_LIMIT_DOWN_PIN) == GPIO_VALUE_HIGH)
     {
         // printf("motor limit up tigger\r\n");
         MOTOR_UP->gpio_write(MOTOR_UP_PIN,GPIO_VALUE_LOW);
         MOTOR_DOWN->gpio_write(MOTOR_DOWN_PIN,GPIO_VALUE_LOW);
+        if(m_cmd == M_UP || m_cmd == M_DOWN)
+        {
+            c_state = STATE_FINISH;
+        }
         m_cmd = M_STOP;
-        if(is_up_limit_active && !is_down_limit_active)
-            is_motor_outside = true;
-        if(!is_up_limit_active &&  is_down_limit_active)
-            is_motor_outside = false;
+        // if(is_up_limit_active && !is_down_limit_active)
+        //     is_motor_outside = true;
+        // if(!is_up_limit_active &&  is_down_limit_active)
+        //     is_motor_outside = false;
         return;
     }
-    if(m_cmd == M_UP)
+    if(c_state == STATE_RUNNING)
     {
-        MOTOR_UP->gpio_write(MOTOR_UP_PIN,GPIO_VALUE_LOW);
-        MOTOR_DOWN->gpio_write(MOTOR_DOWN_PIN,GPIO_VALUE_HIGH);
-    }
-    else if(m_cmd == M_DOWN)
-    {
-        MOTOR_UP->gpio_write(MOTOR_UP_PIN,GPIO_VALUE_HIGH);
-        MOTOR_DOWN->gpio_write(MOTOR_DOWN_PIN,GPIO_VALUE_LOW);
+        if(m_cmd == M_DOWN)
+        {
+            MOTOR_UP->gpio_write(MOTOR_UP_PIN,GPIO_VALUE_LOW);
+            MOTOR_DOWN->gpio_write(MOTOR_DOWN_PIN,GPIO_VALUE_HIGH);
+            if(delay_flag)
+            {
+                usleep(60000);      //60ms
+                delay_flag = false;
+            }
+        }
+        else if(m_cmd == M_UP)
+        {
+            MOTOR_UP->gpio_write(MOTOR_UP_PIN,GPIO_VALUE_HIGH);
+            MOTOR_DOWN->gpio_write(MOTOR_DOWN_PIN,GPIO_VALUE_LOW);
+            if(delay_flag)
+            {
+                usleep(60000);      //60ms
+                delay_flag = false;
+            }
+        }
     }
 }
 
