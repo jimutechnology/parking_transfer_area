@@ -201,28 +201,37 @@ void AreaControl::rx_car_state_data(const car_scanner::CarState msg)
 
 void AreaControl::rx_screen_cmd(const transfer_area::ScreenCmd msg)
 {
-    if(msg.id == 0)
+    if(msg.id == 1)
     {
         if(msg.state == 0)
         {
             d_cmd = D_FORWARD_Q;
-            c_state = STATE_RUNNING;
-            m_cmd = M_UP;
-            delay_flag = true;
+            if(c_state != STATE_RUNNING)
+            {
+                c_state = STATE_RUNNING;
+                m_cmd = M_UP;
+                delay_flag = true;
+            }
         }
         if(msg.state == 1)
         {
             d_cmd = D_FORWARD;
-            c_state = STATE_RUNNING;
-            m_cmd = M_UP;
-            delay_flag = true;
+            if(c_state != STATE_RUNNING)
+            {
+                c_state = STATE_RUNNING;
+                m_cmd = M_UP;
+                delay_flag = true;   
+            }
         }
         else if(msg.state == 2)
         {
             d_cmd = D_OK;
-            c_state = STATE_RUNNING;
-            m_cmd = M_DOWN;
-            delay_flag = true;
+            if(c_state != STATE_RUNNING)
+            {
+                c_state = STATE_RUNNING;
+                m_cmd = M_DOWN;
+                delay_flag = true;        
+            }
         }
         else if(msg.state == 3 || msg.state == 5 || msg.state == 6)
         {
