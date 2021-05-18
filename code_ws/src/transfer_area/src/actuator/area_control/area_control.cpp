@@ -8,22 +8,39 @@
 #include <mutex>
 #include "area_control.h"
 #include "std_msgs/String.h"
+#include "transfer_area/MotorPosition.h"
+#include "transfer_area/MotorCmd.h"
 #include "transfer_area/InfoOut.h"
 #include "transfer_area/LightCurtainState.h"
 #include "transfer_area/ScreenCmd.h"
 #include "car_scanner/CarInfo.h"
+#include "car_scanner/WheelArray.h"
+#include "car_scanner/Wheel.h"
 #include "car_scanner/CarState.h"
 #include "../../actuator/gpio/gpio.h"
+#include <sys/time.h>
 
 using namespace std;
 
 #define AREA_CONTROL "area_control"
 
+// #define ENABLE_MOTOR_AUTO_DOWN
+
+#define  AREA_CONTROL_HZ        100
+#define  MOTOR_UP_TIMEOUT       5*60*AREA_CONTROL_HZ
+#define  MOTOR_AUTO_DOWN_TIMEOUT       35*AREA_CONTROL_HZ
+#define  CMD_TIMEOUT            6*AREA_CONTROL_HZ
+#define  SCREEN_TIGGER_TIMEOUT  2*AREA_CONTROL_HZ
+#define  SCREEN_TIGGER_WAIT_TIMEOUT     3*60*AREA_CONTROL_HZ
+
+#define  OUTSIDE_SCREEN_ID      1
+#define  INSIDE_SCREEN_ID       0
+
 #define  GPIO_VALUE_HIGH        1
 #define  GPIO_VALUE_LOW         0
 
-#define  M_LIMIT_UP_PIN         20
-#define  M_LIMIT_DOWN_PIN       26   //触发是低电平
+#define  M_LIMIT_UP_PIN         26
+#define  M_LIMIT_DOWN_PIN       20   //触发是低电平
 #define  EZ_SCREEN_INSIDE_PIN   19
 #define  EZ_SCREEN_OUTSIDE_PIN  5
 #define  MOTOR_UP_PIN           15
@@ -55,21 +72,31 @@ public:
     ros::Publisher      warning_info_pub;
 
     ros::Publisher      light_curtain_pub;
+    ros::Publisher      motor_pos_pub;
 
     ros::Subscriber     car_state_sub;
     ros::Subscriber     car_info_sub;
+    ros::Subscriber     wheel_info_sub;
     ros::Subscriber     screen_cmd_sub;
+    ros::Subscriber     motor_cmd_sub;
+    
 
     transfer_area::LightCurtainState light_curtain_data;
+    transfer_area::MotorPosition motor_pos_data;
+    
     // transfer_area::ScreenCmd screen_data;
 
     motor_cmd m_cmd = M_STOP;
     bool delay_flag = false;
     motor_poistion m_pos = M_POSITION_UNKNOWN;
-    bool is_motor_outside = false;
+    bool is_up_limit_active = M_LIMIT_UP->gpio_read(M_LIMIT_UP_PIN) == GPIO_VALUE_LOW;
+    bool is_down_limit_active = M_LIMIT_DOWN->gpio_read(M_LIMIT_DOWN_PIN) == GPIO_VALUE_LOW;
+    bool is_up_limit_active_last = is_up_limit_active;
+    bool is_down_limit_active_last = is_down_limit_active;
+
+
     dispaly_cmd d_cmd = D_FORWARD_Q;
-    bool ez_screen_f = false;
-    bool ez_screen_b = false;
+
     car_scanner::CarState car_state;
     car_scanner::CarInfo car_info;
 
@@ -88,11 +115,19 @@ public:
     Gpio *DISPLAY_A3 = nullptr;     //yellow-forward-quiet
 	Gpio *DISPLAY_A4 = nullptr;     //back
 
-    bool is_up_limit_active = M_LIMIT_UP->gpio_read(M_LIMIT_UP_PIN) == GPIO_VALUE_LOW;
-    bool is_down_limit_active = M_LIMIT_DOWN->gpio_read(M_LIMIT_DOWN_PIN) == GPIO_VALUE_LOW;
-    bool is_up_limit_active_last = is_up_limit_active;
-    bool is_down_limit_active_last = is_down_limit_active;
     cmd_state c_state = STATE_EMPTY;
+    car_check_step car_check_state = C_NONE;
+    bool car_check_state_flag = false;
+
+    bool is_lidar_scan_wheel[2] = {false,false};
+    bool is_screen_tigger[2] = {false,false};
+
+    struct timeval stamp;
+    uint64_t lidar_scan_update_time[2];
+    uint64_t wheel_info_update_time;
+    uint64_t now;
+
+
 
 public:
     AreaControl()
@@ -113,6 +148,9 @@ public:
 
     ~AreaControl() 
 	{
+        MOTOR_UP->gpio_write(MOTOR_UP_PIN,GPIO_VALUE_LOW);
+        MOTOR_DOWN->gpio_write(MOTOR_DOWN_PIN,GPIO_VALUE_LOW);
+        
         delete M_LIMIT_UP;
         delete M_LIMIT_DOWN;
         delete EZ_SCREEN_OUTSIDE;
@@ -133,13 +171,17 @@ public:
     void Error(int16_t error_code, string message) const;
 
     void rx_car_info_data(const car_scanner::CarInfo msg);
+    void rx_wheel_info_data(const car_scanner::WheelArray msg);
     void rx_car_state_data(const car_scanner::CarState msg);
 
     void area_cmd_update(void);
+    bool set_motor_cmd(motor_cmd cmd);
+    void motor_cmd_update(void);
     void motor_control(void);
     void display_control(void);
     void update_ez_screen_state(void);
     void rx_screen_cmd(const transfer_area::ScreenCmd msg);
+    void rx_motor_cmd(const transfer_area::MotorCmd msg);
     motor_poistion update_motor_position(void);
 
 };
@@ -167,36 +209,57 @@ bool AreaControl::AreaControl_Init(void)
 	warning_info_pub = nh.advertise<transfer_area::InfoOut>(string("warning_info"), 3);
 
     light_curtain_pub = nh.advertise<transfer_area::LightCurtainState>(string("light_curtain_state"), 3);
+    motor_pos_pub = nh.advertise<transfer_area::MotorPosition>(string("motor_pos"), 3);
+    
     car_state_sub = nh.subscribe("car_state",  5, &AreaControl::rx_car_state_data, this);
     car_info_sub = nh.subscribe("car_info",  5, &AreaControl::rx_car_info_data, this);
-
+    wheel_info_sub = nh.subscribe("wheel_info",  5, &AreaControl::rx_wheel_info_data, this);
     screen_cmd_sub = nh.subscribe("screen_cmd",  5, &AreaControl::rx_screen_cmd, this);
+    motor_cmd_sub = nh.subscribe("motor_cmd",  5, &AreaControl::rx_motor_cmd, this);
 
 
 	return true;
 }
 
 void AreaControl::rx_car_info_data(const car_scanner::CarInfo msg)
-{
+{    
     memcpy(&car_info,&msg,sizeof(car_scanner::CarInfo));
+}
+void AreaControl::rx_wheel_info_data(const car_scanner::WheelArray msg)
+{
+    gettimeofday(&stamp, NULL);
+    wheel_info_update_time = stamp.tv_sec*1000000 + stamp.tv_usec;
+    if(msg.header.frame_id == "laser_1")
+    {
+        lidar_scan_update_time[0] = stamp.tv_sec*1000000 + stamp.tv_usec;
+    }
+    
+
+    if(msg.header.frame_id == "laser_2")
+    {
+        lidar_scan_update_time[1] = stamp.tv_sec*1000000 + stamp.tv_usec;
+    }
 }
 
 void AreaControl::rx_car_state_data(const car_scanner::CarState msg)
 {
-    memcpy(&car_state,&msg,sizeof(car_scanner::CarState));
-    /*
+    #ifdef ENABLE_MOTOR_AUTO_DOWN
+    static uint16_t available_cnt = 0;
     if(msg.is_car_available)
     {
-        d_cmd = D_OK;
-        m_cmd = M_UP;
+        available_cnt++;
+        if(available_cnt > MOTOR_AUTO_DOWN_TIMEOUT)
+        {
+            set_motor_cmd(M_DOWN);
+        }
     }
     else
     {
-        // m_cmd = M_DOWN;
-        ;
+        available_cnt = 0;
     }
-    */
-    
+    #endif
+
+    memcpy(&car_state,&msg,sizeof(car_scanner::CarState));
 }
 
 void AreaControl::rx_screen_cmd(const transfer_area::ScreenCmd msg)
@@ -206,32 +269,14 @@ void AreaControl::rx_screen_cmd(const transfer_area::ScreenCmd msg)
         if(msg.state == 0)
         {
             d_cmd = D_FORWARD_Q;
-            if(c_state != STATE_RUNNING)
-            {
-                c_state = STATE_RUNNING;
-                m_cmd = M_UP;
-                delay_flag = true;
-            }
         }
         if(msg.state == 1)
         {
             d_cmd = D_FORWARD;
-            if(c_state != STATE_RUNNING)
-            {
-                c_state = STATE_RUNNING;
-                m_cmd = M_UP;
-                delay_flag = true;   
-            }
         }
         else if(msg.state == 2)
         {
             d_cmd = D_OK;
-            if(c_state != STATE_RUNNING)
-            {
-                c_state = STATE_RUNNING;
-                m_cmd = M_DOWN;
-                delay_flag = true;        
-            }
         }
         else if(msg.state == 3 || msg.state == 5 || msg.state == 6)
         {
@@ -240,6 +285,41 @@ void AreaControl::rx_screen_cmd(const transfer_area::ScreenCmd msg)
     }
 }
 
+void AreaControl::rx_motor_cmd(const transfer_area::MotorCmd msg)
+{
+    if(msg.cmd == msg.CMD_UP)
+    {
+        set_motor_cmd(M_UP);
+    }
+    else if(1)//car_state.is_car_available)
+    {
+        if(msg.cmd == msg.CMD_DOWN)
+        {
+            set_motor_cmd(M_DOWN);
+        }
+    }
+}
+
+bool AreaControl::set_motor_cmd(motor_cmd cmd)
+{
+    if(m_pos == M_POSITION_UP && cmd == M_UP)
+        return true;
+    if(m_pos == M_POSITION_DOWN && cmd == M_DOWN)
+        return true;
+    //printf("test-a\r\n");
+    if(c_state != STATE_RUNNING)
+    {
+        //printf("test-b\r\n");
+        c_state = STATE_RUNNING;
+        delay_flag = true;
+
+        m_cmd = cmd;
+        if(cmd == M_DOWN)
+            car_check_state = C_NONE;
+        return true;      
+    }
+    return false;
+}
 motor_poistion AreaControl::update_motor_position(void)
 {
     is_up_limit_active_last = is_up_limit_active;
@@ -278,13 +358,38 @@ motor_poistion AreaControl::update_motor_position(void)
         m_pos = M_POSITION_MID;
     }
 
+    if(is_lidar_scan_wheel[1])
+    {
+        // m_pos = M_POSITION_UP;
+        motor_pos_data.state = M_POSITION_UP;
+    }
+    else
+    {
+        motor_pos_data.state = m_pos;
+    }
+    motor_pos_pub.publish(motor_pos_data);
+
     return m_pos;
 }
 void AreaControl::motor_control(void)
-{ 
-    update_motor_position();
+{     
+    static uint16_t cmd_timeoutcnt = 0;
 
+    // 确保升降指令执行不超过CMD_TIMEOUT(10s)
+    if(c_state == STATE_RUNNING)
+    {
+        cmd_timeoutcnt++;
+        if(cmd_timeoutcnt > CMD_TIMEOUT)
+        {
+            c_state = STATE_ERROR;
+        }
+    }
+    else
+    {
+        cmd_timeoutcnt = 0;
+    }
     
+    // 升 降 停  执行
     if(c_state != STATE_RUNNING || (is_up_limit_active && is_down_limit_active) || (m_pos == M_POSITION_DOWN && m_cmd == M_DOWN) || (m_pos == M_POSITION_UP && m_cmd == M_UP))
     // if((is_up_limit_active && is_down_limit_active) /*|| (m_cmd == M_STOP) */|| ((is_up_limit_active_last != is_up_limit_active) && is_up_limit_active) || ((is_down_limit_active_last != is_down_limit_active) && is_down_limit_active))// && M_LIMIT_DOWN->gpio_read(M_LIMIT_DOWN_PIN) == GPIO_VALUE_HIGH)
     {
@@ -296,10 +401,6 @@ void AreaControl::motor_control(void)
             c_state = STATE_FINISH;
         }
         m_cmd = M_STOP;
-        // if(is_up_limit_active && !is_down_limit_active)
-        //     is_motor_outside = true;
-        // if(!is_up_limit_active &&  is_down_limit_active)
-        //     is_motor_outside = false;
         return;
     }
     if(c_state == STATE_RUNNING)
@@ -326,6 +427,171 @@ void AreaControl::motor_control(void)
         }
     }
 }
+
+void AreaControl::motor_cmd_update(void)
+{
+    static uint16_t timeoutcnt = 0;
+    static uint16_t  screen_tigger_timeout = 0;
+    
+    // 确保升降机在上升状态下不会超过 MOTOR_UP_TIMEOUT  
+    if(m_pos == M_POSITION_UP)
+    {
+        timeoutcnt++;
+        if(timeoutcnt > MOTOR_UP_TIMEOUT)
+        {
+            if(set_motor_cmd(M_DOWN))
+            {
+                timeoutcnt = 0;
+            }
+        }
+    }
+    else
+    {
+        timeoutcnt = 0;
+    }
+
+
+    // step:1
+    // 交接区内没有车
+    if((!is_lidar_scan_wheel[0]) && (!is_lidar_scan_wheel[1]))
+    {
+        if(m_pos != M_POSITION_DOWN)
+            set_motor_cmd(M_DOWN);
+        car_check_state = C_TRANSFER_EMPTY;
+    }
+    else
+    {
+        ;
+        // if(car_check_state == C_TRANSFER_EMPTY)
+        //     car_check_state = C_NONE;
+    }
+    
+
+    // step:2
+    if(is_screen_tigger[OUTSIDE_SCREEN_ID] && car_check_state == C_TRANSFER_EMPTY)
+    {
+        car_check_state = C_SCREEN_TIGGER;
+        screen_tigger_timeout = 0;
+    }
+    else
+    {
+        if(car_check_state == C_SCREEN_TIGGER)
+        {
+            screen_tigger_timeout++;
+            if(screen_tigger_timeout > SCREEN_TIGGER_WAIT_TIMEOUT)
+            {
+                screen_tigger_timeout = 0;
+                car_check_state = C_NONE;
+            }
+        }
+    }
+    // step:3
+    if(is_lidar_scan_wheel[0])
+    {
+        if(car_check_state == C_SCREEN_TIGGER)
+        {
+            car_check_state = C_SINGLE_LIDAR_READY;
+            set_motor_cmd(M_UP);
+        }
+    }
+    else
+    {
+        if(car_check_state == C_SINGLE_LIDAR_READY)
+            car_check_state = C_NONE;
+    }
+    //printf("state:%d\r\n",car_check_state);
+}
+
+void AreaControl::update_ez_screen_state(void)
+{
+    static uint16_t screen_tigger_cnt[2] = {0,0};
+
+    if(GPIO_VALUE_LOW == EZ_SCREEN_OUTSIDE->gpio_read(EZ_SCREEN_OUTSIDE_PIN))         //前门光幕
+    {
+        // 消抖
+        usleep(15000);//15ms
+        // 确实触发
+        if(GPIO_VALUE_LOW == EZ_SCREEN_OUTSIDE->gpio_read(EZ_SCREEN_OUTSIDE_PIN))
+        {
+            screen_tigger_cnt[OUTSIDE_SCREEN_ID]++;
+            if(screen_tigger_cnt[OUTSIDE_SCREEN_ID]  > SCREEN_TIGGER_TIMEOUT)
+            {
+                is_screen_tigger[OUTSIDE_SCREEN_ID] = true;
+                // if(car_check_state == C_NONE)
+                // {
+                //     // car_check_state = C_SCREEN_TIGGER;
+                //     printf("screen tigger larger than 2s!\r\n");
+                // }
+            }
+
+            light_curtain_data.id = OUTSIDE_SCREEN_ID;
+            light_curtain_data.state = true;
+            light_curtain_pub.publish(light_curtain_data);
+            // printf("check screen at outside\r\n"); 
+        }
+        else
+        {
+            light_curtain_data.id = OUTSIDE_SCREEN_ID;
+            light_curtain_data.state = false;
+            light_curtain_pub.publish(light_curtain_data);
+
+            screen_tigger_cnt[OUTSIDE_SCREEN_ID] = 0;
+            is_screen_tigger[OUTSIDE_SCREEN_ID] = false;
+        }
+        
+    }
+    else
+    {
+        light_curtain_data.id = OUTSIDE_SCREEN_ID;
+        light_curtain_data.state = false;
+        light_curtain_pub.publish(light_curtain_data);
+
+        screen_tigger_cnt[OUTSIDE_SCREEN_ID] = 0;
+        is_screen_tigger[OUTSIDE_SCREEN_ID] = false;
+    }
+
+    if(GPIO_VALUE_LOW == EZ_SCREEN_INSIDE->gpio_read(EZ_SCREEN_INSIDE_PIN))         //后门光幕
+    {
+        usleep(15000);//15ms
+        if(GPIO_VALUE_LOW == EZ_SCREEN_INSIDE->gpio_read(EZ_SCREEN_INSIDE_PIN))
+        {
+            screen_tigger_cnt[INSIDE_SCREEN_ID]++;
+            if(screen_tigger_cnt[INSIDE_SCREEN_ID] > SCREEN_TIGGER_TIMEOUT)
+            {
+                is_screen_tigger[INSIDE_SCREEN_ID] = true;
+            }
+            light_curtain_data.id = INSIDE_SCREEN_ID;
+            light_curtain_data.state = true;
+            light_curtain_pub.publish(light_curtain_data);
+            // printf("check screen at inside\r\n"); 
+        }
+        else
+        {
+            screen_tigger_cnt[INSIDE_SCREEN_ID] = 0;
+            is_screen_tigger[INSIDE_SCREEN_ID] = false;
+            light_curtain_data.id = INSIDE_SCREEN_ID;
+            light_curtain_data.state = false;
+            light_curtain_pub.publish(light_curtain_data);
+        }
+        
+    }
+    else
+    {
+        screen_tigger_cnt[INSIDE_SCREEN_ID] = 0;
+        is_screen_tigger[INSIDE_SCREEN_ID] = false;
+        light_curtain_data.id = INSIDE_SCREEN_ID;
+        light_curtain_data.state = false;
+        light_curtain_pub.publish(light_curtain_data);
+    }
+}
+
+
+void AreaControl::area_cmd_update(void)
+{
+    ;
+}
+
+
 
 void AreaControl::display_control(void)
 {
@@ -359,120 +625,51 @@ void AreaControl::display_control(void)
     }
 }
 
-
-void AreaControl::update_ez_screen_state(void)
-{
-    if(GPIO_VALUE_LOW == EZ_SCREEN_OUTSIDE->gpio_read(EZ_SCREEN_OUTSIDE_PIN))         //前门光幕
-    {
-        usleep(15000);//15ms
-        if(GPIO_VALUE_LOW == EZ_SCREEN_OUTSIDE->gpio_read(EZ_SCREEN_OUTSIDE_PIN))
-        {
-            light_curtain_data.id = 1;
-            light_curtain_data.state = true;
-            light_curtain_pub.publish(light_curtain_data);
-            ez_screen_f = true;
-            // printf("check screen at outside\r\n"); 
-        }
-        else
-        {
-            light_curtain_data.id = 1;
-            light_curtain_data.state = false;
-            light_curtain_pub.publish(light_curtain_data);
-            ez_screen_f = false;
-        }
-        
-    }
-    else
-    {
-        light_curtain_data.id = 1;
-        light_curtain_data.state = false;
-        light_curtain_pub.publish(light_curtain_data);
-        ez_screen_f = false;
-    }
-
-    if(GPIO_VALUE_LOW == EZ_SCREEN_INSIDE->gpio_read(EZ_SCREEN_INSIDE_PIN))         //后门光幕
-    {
-        usleep(15000);//15ms
-        if(GPIO_VALUE_LOW == EZ_SCREEN_INSIDE->gpio_read(EZ_SCREEN_INSIDE_PIN))
-        {
-            light_curtain_data.id = 0;
-            light_curtain_data.state = true;
-            light_curtain_pub.publish(light_curtain_data);
-            ez_screen_b = true;
-            // printf("check screen at inside\r\n"); 
-        }
-        else
-        {
-            light_curtain_data.id = 0;
-            light_curtain_data.state = false;
-            light_curtain_pub.publish(light_curtain_data);
-            ez_screen_b = false;
-        }
-        
-    }
-    else
-    {
-        light_curtain_data.id = 0;
-        light_curtain_data.state = false;
-        light_curtain_pub.publish(light_curtain_data);
-        ez_screen_b = false;
-    }
-}
-
-void AreaControl::area_cmd_update(void)
-{
-    static uint16_t cnt = 0;
-    cnt++;
-    // m_cmd = M_STOP;
-    // d_cmd = D_FORWARD;
-    if(cnt > 500)
-    {
-        cnt = 0;
-        if(m_cmd == M_STOP)
-        {
-            m_cmd = M_UP;
-        }
-        else if(m_cmd == M_UP)
-        {
-            m_cmd = M_DOWN;
-        }
-        else if(m_cmd == M_DOWN)
-        {
-            m_cmd = M_STOP;
-        }
-
-        if(d_cmd == D_FORWARD)
-        {
-            d_cmd = D_OK;
-        }
-        else if(d_cmd == D_OK)
-        {
-            d_cmd = D_FORWARD_Q;
-        }
-        else if(d_cmd == D_FORWARD_Q)
-        {
-            d_cmd = D_BACK;
-        }
-        else if(d_cmd == D_BACK)
-        {
-            d_cmd = D_FORWARD;
-        }
-    }
-
-}
-
 void AreaControl::run(void)
 {
 	static uint16_t task_cnt=0;
 	task_cnt++;
 
+    gettimeofday(&stamp, NULL);
+    now = stamp.tv_sec*1000000 + stamp.tv_usec;
+    // printf("now:%ld,a:%ld %ld\r\n",now,wheel_info_update_time,(now - wheel_info_update_time));
+    // printf("----now:%ld,a:%ld %ld\r\n",lidar_scan_update_time[0],lidar_scan_update_time[1],(now - lidar_scan_update_time[0]));
+
+    if((now - lidar_scan_update_time[0]) < 600000)
+    {
+        is_lidar_scan_wheel[0] = true;
+    }
+    else
+    {
+        is_lidar_scan_wheel[0] = false;
+    }
+
+    if((now - lidar_scan_update_time[1]) < 600000)
+    {
+        is_lidar_scan_wheel[1] = true;
+    }
+    else
+    {
+        is_lidar_scan_wheel[1] = false;
+    }
+    
+    // if(now - wheel_info_update_time >= 600000)
+    // {
+
+    //     is_lidar_scan_wheel[0] = false;
+    //     is_lidar_scan_wheel[1] = false;
+    // }
+    //printf("is lidar [%d %d]\r\n",is_lidar_scan_wheel[0],is_lidar_scan_wheel[1]);
+    // screen
     update_ez_screen_state();
-
-    //gpio test
-    // area_cmd_update();
-
-    display_control();
+    
+    // motor
+    update_motor_position();
+    motor_cmd_update();
     motor_control();
+
+    // dispaly
+    display_control();
 }
 
 
@@ -481,7 +678,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, AREA_CONTROL);
     ros::NodeHandle nh("");
-    ros::Rate r(100);
+    ros::Rate r(AREA_CONTROL_HZ);
 
     AreaControl area_ctrl;
 
@@ -489,7 +686,7 @@ int main(int argc, char **argv)
     //     return EXIT_FAILURE;
 
 	area_ctrl.AreaControl_Init();
-
+    sleep(3);
     while(ros::ok())
     {
         area_ctrl.run();

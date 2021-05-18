@@ -2,26 +2,28 @@ lidar_1:              # Lidar parameters of a lidar in the transfer area
   pose: [2.995, 2.365, -1.57079633]  # pose [x, y, yaw] of the lidar w.r.t. {T} (transfer area frame)
   # Below are also configuration for the launched lidar node
   frame_id: "laser_1"       # frame_id of the lidar
-  min_ang: -1.5707963268    # minimum scanning angle
-  max_ang: 1.5707963268     # maximum scanning angle
+  min_ang: -0.9 ##-1.5707963268    # minimum scanning angle
+  max_ang: 0.9  ##1.5707963268     # maximum scanning angle
   hostname: "192.168.2.102" # IP address
   port: "2112"              # port (following IP address)
   # Below are wheel detection region for the lidar
-  distance_left:      2.1     # scan region of the lidar
-  distance_right:     2.1
-  distance_front:     1.9
+  distance_left:      2.5     # scan region of the lidar
+  distance_right:     2.5
+  distance_front:     2.5
+  b_lidar_upsidedown: true         # whether the lidars are upside down
 lidar_2:
   pose: [2.995, -2.35, 1.53579633]
   # Below are also configuration for the launched lidar node
   frame_id: "laser_2"       # frame_id of the lidar
-  min_ang: -1.5707963268    # minimum scanning angle
-  max_ang: 1.5707963268     # maximum scanning angle
+  min_ang: -0.9  ##-1.5707963268    # minimum scanning angle
+  max_ang: 0.9   ##1.5707963268     # maximum scanning angle
   hostname: "192.168.2.101" # IP address
   port: "2112"              # port (following IP address)
   # Below are wheel detection region for the lidar
-  distance_left:      2.1     # scan region of the lidar
-  distance_right:     2.1
-  distance_front:     1.9
+  distance_left:      2.5     # scan region of the lidar
+  distance_right:     2.5
+  distance_front:     2.5
+  b_lidar_upsidedown: false         # whether the lidars are upside down
 
 # TODO: parameters
 car_spec:              # spec limits for the car
@@ -39,7 +41,7 @@ car_pose_limit:            # limits for the pose of the car
   max_car_x:         4.0  # max X position of the car, [m]
   min_car_x:         2.0   # min X position of the car, [m]
   max_car_y:         0.93  # max Y position of the car, [m]
-  min_car_y:        -0.07  # min Y position of the car, [m]
+  min_car_y:        -0.73  # min Y position of the car, [m]
 
 # TODO: estimated parameters
 para_default:            # some esimated defaul parameters

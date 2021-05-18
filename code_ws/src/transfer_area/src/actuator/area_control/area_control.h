@@ -52,6 +52,14 @@ typedef enum
 
 typedef enum
 {
+  C_NONE = 0,
+  C_TRANSFER_EMPTY = 1,
+  C_SCREEN_TIGGER = 2,
+  C_SINGLE_LIDAR_READY = 3,
+}car_check_step;
+
+typedef enum
+{
 STATE_EMPTY    = 0,
 STATE_READLY   = 1,
 STATE_SENDED   = 2,

@@ -6,7 +6,7 @@ import time
 import rospy
 import copy
 from car_scanner.msg import CarState
-from transfer_area.msg import CommandReply, StateCmd, UnderpanDetectionState, LightCurtainState, DoorCmd, InfoOut, DockState, Door, ScreenCmd
+from transfer_area.msg import CommandReply, StateCmd, UnderpanDetectionState, LightCurtainState, DoorCmd, InfoOut, DockState, Door, ScreenCmd,MotorPosition
 from transfer_area.srv import getAreaState, getDoorState, getGroundStatus
 
 from area_common import ServiceNode, RunService, getHeader, running_state as RS, area_state as AS, screen_state as SS
@@ -18,6 +18,9 @@ class Detection_Car(ServiceNode):
         self.lock_rx_car_state = threading.Lock()
         self.car_state_data = CarState()
         self.Subscriber("car_state", CarState, self.rx_car_state)
+        self.lock_rx_motor_pos = threading.Lock()
+        self.motor_pos_data = MotorPosition()
+        self.Subscriber("motor_pos",MotorPosition,self.rx_motor_pos)
         self.car_scanner_successful = False
         self.dock_state = DockState()
         self.dock_status_pub = self.Publisher('dock_state', DockState, queue_size=1)
@@ -26,6 +29,9 @@ class Detection_Car(ServiceNode):
         with self.lock_rx_car_state:
             self.car_state_data = copy.deepcopy(data)
             self.car_scanner_successful = True
+    def rx_motor_pos(self,data):
+        with self.lock_rx_motor_pos:
+            self.motor_pos_data = copy.deepcopy(data)
         
     def get_ground_status(self):
         try:
@@ -52,7 +58,18 @@ class Detection_Car(ServiceNode):
     def execute(self):
         self.get_ground_status()
         ##self.get_doorstate()
+
+
         self.dock_state.header = copy.deepcopy(getHeader())
+        #if(self.car_scanner_successful == True):
+        #    self.dock_state.area_state = DockState.OCCUPY
+        #else:
+        #    self.dock_state.area_state = DockState.EMPTY
+        
+        if(self.motor_pos_data.state == self.motor_pos_data.POSITION_DOWN):
+            self.dock_state.is_motor_down = True
+        else:
+            self.dock_state.is_motor_down = False
         self.dock_status_pub.publish(self.dock_state)
         if self.dock_state.area_state == DockState.EMPTY and self.car_scanner_successful == False:
             return False

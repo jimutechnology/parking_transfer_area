@@ -6,7 +6,7 @@ import copy
 import threading
 import math
 from command import Command
-from transfer_area.msg import CommandReply
+from transfer_area.msg import CommandReply,MotorCmd
 from car_scanner.msg import CarState
 from geometry_msgs.msg import Pose2D
 from area_common import AreaParam
@@ -17,6 +17,9 @@ class DetectionCommand(Command):
         self.lock_rx_car_state = threading.Lock()
         self.car_state_data = CarState()
         self.Subscriber("car_state", CarState, self.rx_car_state)
+
+        self.motor_cmd = MotorCmd()
+        self.motor_cmd_pub = self.Publisher('motor_cmd', MotorCmd, queue_size=10)
         self.car_scanner_successful = False
 
         param = AreaParam()
@@ -75,6 +78,9 @@ class DetectionCommand(Command):
             message_text += "\n" + "scanYaw: " + str(pose_in_map.theta)
             self.message = message_text
             self.Reply(state = CommandReply.STATE_FINISH)
+
+            self.motor_cmd.cmd = self.motor_cmd.CMD_DOWN
+            self.motor_cmd_pub.publish(self.motor_cmd)
         else:
             message_text = "result: " + str(False)
             self.message = message_text

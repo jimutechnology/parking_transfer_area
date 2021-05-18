@@ -74,10 +74,11 @@ bool ObstacleExtractor::LoadParams() {
   ros::param::param("/lidar_" + to_string(laser_id) + "/distance_left", distance_left, 2.5);
   ros::param::param("/lidar_" + to_string(laser_id) + "/distance_right", distance_right, 2.5);
   ros::param::param("/lidar_" + to_string(laser_id) + "/distance_front", distance_front, 1.5);
+  ros::param::param("/lidar_" + to_string(laser_id) + "/b_lidar_upsidedown", p_b_lidar_upsidedown, false);
   ros::param::param("/obstacle_extractor/min_angle", min_angle, -1.57);
   ros::param::param("/obstacle_extractor/max_angle", max_angle, 1.57);
 
-  ros::param::param("/obstacle_extractor/b_lidar_upsidedown", p_b_lidar_upsidedown, false);
+  // ros::param::param("/obstacle_extractor/b_lidar_upsidedown", p_b_lidar_upsidedown, false);
   return true;
 }
 

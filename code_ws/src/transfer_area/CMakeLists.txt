@@ -52,6 +52,8 @@ add_message_files(
   FILES
   CommandReply.msg
   DockState.msg
+  MotorCmd.msg
+  MotorPosition.msg
   Door.msg
   DoorCmd.msg
   StateCmd.msg
