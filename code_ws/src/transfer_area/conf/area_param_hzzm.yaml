@@ -10,3 +10,5 @@ area_param:
     min_ground_x: 1.0
     max_ground_y: 2.0
     min_ground_y: -2.0
+
+    access_y_offset: 1.5

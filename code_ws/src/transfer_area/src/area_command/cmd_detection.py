@@ -22,8 +22,8 @@ class DetectionCommand(Command):
         self.motor_cmd_pub = self.Publisher('motor_cmd', MotorCmd, queue_size=10)
         self.car_scanner_successful = False
 
-        param = AreaParam()
-        self.pose_in_map = param.pose_in_map
+        self.param = AreaParam()
+        self.pose_in_map = self.param.pose_in_map
         
 
     def rx_car_state(self, data):
@@ -59,12 +59,17 @@ class DetectionCommand(Command):
             y = self.pose_in_map[1],
             theta = self.pose_in_map[2])
         p_b = Pose2D(
-            x = data.aX,
-            y = data.aY,
+            x = data.aX - self.param.access_y_offset * math.cos(data.aYaw),
+            y = data.aY - self.param.access_y_offset * math.sin(data.aYaw),
             theta = data.aYaw)
         p_a = Pose2D()
         p_a.x = p_b.x * math.cos(p_delta.theta) - p_b.y * math.sin(p_delta.theta) + p_delta.x
         p_a.y = p_b.x * math.sin(p_delta.theta) + p_b.y * math.cos(p_delta.theta) + p_delta.y
+        
+        #print self.param.access_y_offset
+        #p_a.y = p_a.y - self.param.access_y_offset * math.sin(p_b.theta)
+        #p_a.x = p_a.x - self.param.access_y_offset * math.cos(p_b.theta)
+
         p_a.theta = p_b.theta + p_delta.theta
         return p_a
 
