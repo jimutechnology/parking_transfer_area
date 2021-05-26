@@ -15,6 +15,7 @@ class CommandManger:
             "DOOR"      : DoorCommand(),
             "STATE"     : StateCommand(),
             "DETECTION" : DetectionCommand(),
+            "LOCK"      : LockCommand(),
         }
 
     def execute(self, pydict):
