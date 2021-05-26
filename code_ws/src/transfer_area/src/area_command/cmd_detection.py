@@ -73,6 +73,7 @@ class DetectionCommand(Command):
         #p_a.x = p_a.x - self.param.access_y_offset * math.cos(p_b.theta)
 
         p_a.theta = p_b.theta + p_delta.theta
+        print(data)
         print(p_delta)
         print(p_b)
         print(p_a)
