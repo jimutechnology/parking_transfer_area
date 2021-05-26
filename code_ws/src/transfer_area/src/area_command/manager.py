@@ -3,9 +3,10 @@
 
 
 import time
-from cmd_door  import DoorCommand
-from cmd_detection  import DetectionCommand
-from cmd_state  import StateCommand
+from cmd_door import DoorCommand
+from cmd_detection import DetectionCommand
+from cmd_lock import LockCommand
+from cmd_state import StateCommand
 
 from transfer_area.msg import CommandReply
 
