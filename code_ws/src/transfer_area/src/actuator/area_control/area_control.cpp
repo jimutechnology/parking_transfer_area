@@ -10,6 +10,7 @@
 #include "std_msgs/String.h"
 #include "transfer_area/MotorPosition.h"
 #include "transfer_area/MotorCmd.h"
+#include "transfer_area/MotorLock.h"
 #include "transfer_area/InfoOut.h"
 #include "transfer_area/LightCurtainState.h"
 #include "transfer_area/ScreenCmd.h"
@@ -79,6 +80,7 @@ public:
     ros::Subscriber     wheel_info_sub;
     ros::Subscriber     screen_cmd_sub;
     ros::Subscriber     motor_cmd_sub;
+    ros::Subscriber     motor_lock_sub;
     
 
     transfer_area::LightCurtainState light_curtain_data;
@@ -127,7 +129,7 @@ public:
     uint64_t wheel_info_update_time;
     uint64_t now;
 
-
+    bool is_motor_lock = false;
 
 public:
     AreaControl()
@@ -182,6 +184,8 @@ public:
     void update_ez_screen_state(void);
     void rx_screen_cmd(const transfer_area::ScreenCmd msg);
     void rx_motor_cmd(const transfer_area::MotorCmd msg);
+    void rx_motor_lock(const transfer_area::MotorLock msg);
+    
     motor_poistion update_motor_position(void);
 
 };
@@ -216,6 +220,8 @@ bool AreaControl::AreaControl_Init(void)
     wheel_info_sub = nh.subscribe("wheel_info",  5, &AreaControl::rx_wheel_info_data, this);
     screen_cmd_sub = nh.subscribe("screen_cmd",  5, &AreaControl::rx_screen_cmd, this);
     motor_cmd_sub = nh.subscribe("motor_cmd",  5, &AreaControl::rx_motor_cmd, this);
+    motor_lock_sub = nh.subscribe("motor_lock",  5, &AreaControl::rx_motor_lock, this);
+    
 
 
 	return true;
@@ -299,9 +305,16 @@ void AreaControl::rx_motor_cmd(const transfer_area::MotorCmd msg)
         }
     }
 }
+void AreaControl::rx_motor_lock(const transfer_area::MotorLock msg)
+{
+    is_motor_lock = msg.enable_lock;
+}
 
 bool AreaControl::set_motor_cmd(motor_cmd cmd)
 {
+    // 调度加锁
+    if(cmd == M_UP && is_motor_lock)
+        return false;
     if(m_pos == M_POSITION_UP && cmd == M_UP)
         return true;
     if(m_pos == M_POSITION_DOWN && cmd == M_DOWN)
@@ -415,7 +428,7 @@ void AreaControl::motor_control(void)
                 delay_flag = false;
             }
         }
-        else if(m_cmd == M_UP)
+        else if(m_cmd == M_UP && (!is_motor_lock))
         {
             MOTOR_UP->gpio_write(MOTOR_UP_PIN,GPIO_VALUE_HIGH);
             MOTOR_DOWN->gpio_write(MOTOR_DOWN_PIN,GPIO_VALUE_LOW);
@@ -490,8 +503,8 @@ void AreaControl::motor_cmd_update(void)
     {
         if(car_check_state == C_SCREEN_TIGGER)
         {
-            car_check_state = C_SINGLE_LIDAR_READY;
-            set_motor_cmd(M_UP);
+            if(set_motor_cmd(M_UP))
+                car_check_state = C_SINGLE_LIDAR_READY;
         }
     }
     else

@@ -53,6 +53,7 @@ add_message_files(
   CommandReply.msg
   DockState.msg
   MotorCmd.msg
+  MotorLock.msg
   MotorPosition.msg
   Door.msg
   DoorCmd.msg
