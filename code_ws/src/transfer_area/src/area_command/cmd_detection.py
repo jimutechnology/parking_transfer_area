@@ -53,7 +53,9 @@ class DetectionCommand(Command):
         error_code += state_data.is_wheel_distance_long * 2 ** 11
         return error_code
     
-    def getCarPose(self, data):
+    def getScanPose(self, data):
+        # pose_in_map: [2.59, 0.2, 1.57079633]
+        # access_y_offset: 1.5
         p_delta = Pose2D(
             x = self.pose_in_map[0],
             y = self.pose_in_map[1],
@@ -71,13 +73,16 @@ class DetectionCommand(Command):
         #p_a.x = p_a.x - self.param.access_y_offset * math.cos(p_b.theta)
 
         p_a.theta = p_b.theta + p_delta.theta
+        print(p_delta)
+        print(p_b)
+        print(p_a)
         return p_a
 
 
     def reply_result(self):
         if self.car_scanner_successful == True and self.car_state_data.is_car_available == True:
+            pose_in_map = self.getScanPose(self.car_state_data)
             message_text = "result: " + str(self.car_state_data.is_car_available)
-            pose_in_map = self.getCarPose(self.car_state_data)
             message_text += "\n" + "scanX: " + str(pose_in_map.x)
             message_text += "\n" + "scanY: " + str(pose_in_map.y)
             message_text += "\n" + "scanYaw: " + str(pose_in_map.theta)
