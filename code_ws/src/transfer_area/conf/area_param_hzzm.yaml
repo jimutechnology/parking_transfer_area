@@ -3,7 +3,7 @@ area_param:
     mqtt_server: "192.168.100.200"
     enter_car: True
 
-    pose_in_map: [2.59, 0.2, 1.57079633]
+    pose_in_map: [2.59, 3.0, 1.57079633]
 
     # ground area to be cleared
     max_ground_x: 5.0
