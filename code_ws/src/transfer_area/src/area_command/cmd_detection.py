@@ -54,31 +54,28 @@ class DetectionCommand(Command):
         return error_code
     
     def getScanPose(self, data):
-        # pose_in_map: [2.59, 0.2, 1.57079633]
-        # access_y_offset: 1.5
-        p_delta = Pose2D(
-            x = self.pose_in_map[0],
-            y = self.pose_in_map[1],
-            theta = self.pose_in_map[2])
-        p_b = Pose2D(
-            x = data.aX - self.param.access_y_offset * math.cos(data.aYaw),
-            y = data.aY - self.param.access_y_offset * math.sin(data.aYaw),
-            theta = data.aYaw)
-        p_a = Pose2D()
-        p_a.x = p_b.x * math.cos(p_delta.theta) - p_b.y * math.sin(p_delta.theta) + p_delta.x
-        p_a.y = p_b.x * math.sin(p_delta.theta) + p_b.y * math.cos(p_delta.theta) + p_delta.y
-        
-        #print self.param.access_y_offset
-        #p_a.y = p_a.y - self.param.access_y_offset * math.sin(p_b.theta)
-        #p_a.x = p_a.x - self.param.access_y_offset * math.cos(p_b.theta)
-
-        p_a.theta = p_b.theta + p_delta.theta
-        print(data)
-        print(p_delta)
-        print(p_b)
-        print(p_a)
-        return p_a
-
+        # points in local transferArea coordinate {Ti}
+        p_local_orig = Pose2D(x=0.0, y=0.0, theta=0.0)
+        p_local_tire = Pose2D(x=data.aX, y=data.aY, theta=data.aYaw)
+        # calculate car head tires center from transferArea local coordinate to global coordinate
+        p_global_orig = Pose2D(x=self.pose_in_map[0], y=self.pose_in_map[1], theta=self.pose_in_map[2])
+        p_global_tire = Pose2D(
+            x = p_global_orig.x - (p_local_tire.y - p_local_orig.y),
+            y = p_global_orig.y + (p_local_tire.x - p_local_orig.x),
+            theta = p_global_orig.theta + p_local_tire.theta
+        )
+        # calculate the scan point for robot in global coordinate
+        p_global_scan = Pose2D(
+            x = p_global_tire.x + self.param.access_y_offset * math.cos(p_global_tire.theta),
+            y = p_global_tire.y + self.param.access_y_offset * math.sin(p_global_tire.theta),
+            theta = p_global_tire.theta
+        )
+        print(p_local_orig)
+        print(p_local_tire)
+        print(p_global_orig)
+        print(p_global_tire)
+        print(p_global_scan)
+        return p_global_scan
 
     def reply_result(self):
         if self.car_scanner_successful == True and self.car_state_data.is_car_available == True:
