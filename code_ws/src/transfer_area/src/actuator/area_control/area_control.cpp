@@ -31,7 +31,8 @@ using namespace std;
 #define  MOTOR_UP_TIMEOUT       5*60*AREA_CONTROL_HZ
 #define  MOTOR_AUTO_DOWN_TIMEOUT       35*AREA_CONTROL_HZ
 #define  CMD_TIMEOUT            6*AREA_CONTROL_HZ
-#define  SCREEN_TIGGER_TIMEOUT  2*AREA_CONTROL_HZ
+#define  SCREEN_TIGGER_TIMEOUT  1*AREA_CONTROL_HZ
+#define  LIDAR_READY_CLEAR_TIMEOUT      1*AREA_CONTROL_HZ/2
 #define  SCREEN_TIGGER_WAIT_TIMEOUT     3*60*AREA_CONTROL_HZ
 
 #define  OUTSIDE_SCREEN_ID      1
@@ -445,6 +446,7 @@ void AreaControl::motor_cmd_update(void)
 {
     static uint16_t timeoutcnt = 0;
     static uint16_t  screen_tigger_timeout = 0;
+    static uint16_t  lidar_ready_timeout = 0;
     
     // 确保升降机在上升状态下不会超过 MOTOR_UP_TIMEOUT  
     if(m_pos == M_POSITION_UP)
@@ -503,12 +505,24 @@ void AreaControl::motor_cmd_update(void)
     {
         if(car_check_state == C_SCREEN_TIGGER)
         {
+            lidar_ready_timeout = 0;
             if(set_motor_cmd(M_UP))
                 car_check_state = C_SINGLE_LIDAR_READY;
         }
+        else
+        {
+            lidar_ready_timeout++;
+            if(lidar_ready_timeout > LIDAR_READY_CLEAR_TIMEOUT)
+            {
+                lidar_ready_timeout = 0;
+                car_check_state = C_SINGLE_LIDAR_READY;
+            }
+        }
+        
     }
     else
     {
+        lidar_ready_timeout = 0;
         if(car_check_state == C_SINGLE_LIDAR_READY)
             car_check_state = C_NONE;
     }
