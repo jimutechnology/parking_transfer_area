@@ -222,14 +222,11 @@ bool AreaControl::AreaControl_Init(void)
     screen_cmd_sub = nh.subscribe("screen_cmd",  5, &AreaControl::rx_screen_cmd, this);
     motor_cmd_sub = nh.subscribe("motor_cmd",  5, &AreaControl::rx_motor_cmd, this);
     motor_lock_sub = nh.subscribe("motor_lock",  5, &AreaControl::rx_motor_lock, this);
-    
-
-
 	return true;
 }
 
 void AreaControl::rx_car_info_data(const car_scanner::CarInfo msg)
-{    
+{
     memcpy(&car_info,&msg,sizeof(car_scanner::CarInfo));
 }
 void AreaControl::rx_wheel_info_data(const car_scanner::WheelArray msg)
@@ -240,8 +237,6 @@ void AreaControl::rx_wheel_info_data(const car_scanner::WheelArray msg)
     {
         lidar_scan_update_time[0] = stamp.tv_sec*1000000 + stamp.tv_usec;
     }
-    
-
     if(msg.header.frame_id == "laser_2")
     {
         lidar_scan_update_time[1] = stamp.tv_sec*1000000 + stamp.tv_usec;
@@ -258,6 +253,7 @@ void AreaControl::rx_car_state_data(const car_scanner::CarState msg)
         if(available_cnt > MOTOR_AUTO_DOWN_TIMEOUT)
         {
             set_motor_cmd(M_DOWN);
+            cout << "~~~~~~~~ area_control: set_motor_down 0" << endl;
         }
     }
     else
@@ -297,13 +293,12 @@ void AreaControl::rx_motor_cmd(const transfer_area::MotorCmd msg)
     if(msg.cmd == msg.CMD_UP)
     {
         set_motor_cmd(M_UP);
+        cout << "~~~~~~~~ area_control: set_motor_up 1" << endl;
     }
-    else if(1)//car_state.is_car_available)
+    else if(msg.cmd == msg.CMD_DOWN)
     {
-        if(msg.cmd == msg.CMD_DOWN)
-        {
-            set_motor_cmd(M_DOWN);
-        }
+        set_motor_cmd(M_DOWN);
+        cout << "~~~~~~~~ area_control: set_motor_down 2" << endl;
     }
 }
 void AreaControl::rx_motor_lock(const transfer_area::MotorLock msg)
@@ -458,6 +453,7 @@ void AreaControl::motor_cmd_update(void)
             {
                 timeoutcnt = 0;
             }
+            cout << "~~~~~~~~ area_control: set_motor_down 3" << endl;
         }
     }
     else
@@ -470,8 +466,10 @@ void AreaControl::motor_cmd_update(void)
     // 交接区内没有车
     if((!is_lidar_scan_wheel[0]) && (!is_lidar_scan_wheel[1]))
     {
-        if(m_pos != M_POSITION_DOWN)
+        if(m_pos != M_POSITION_DOWN) {
             set_motor_cmd(M_DOWN);
+            cout << "~~~~~~~~ area_control: set_motor_down 4" << endl;
+        }
         car_check_state = C_TRANSFER_EMPTY;
     }
     else
@@ -486,7 +484,7 @@ void AreaControl::motor_cmd_update(void)
     if(is_screen_tigger[OUTSIDE_SCREEN_ID] && car_check_state == C_TRANSFER_EMPTY)
     {
         car_check_state = C_SCREEN_TIGGER;
-        screen_tigger_timeout = 0;
+        screen_tigger_timeout = task_cnt; //0；
     }
     else
     {
@@ -503,11 +501,13 @@ void AreaControl::motor_cmd_update(void)
     // step:3
     if(is_lidar_scan_wheel[0])
     {
-        if(car_check_state == C_SCREEN_TIGGER)
+        //if(car_check_state == C_SCREEN_TIGGER)
+        if ((car_check_state == C_SCREEN_TIGGER) && (task_cnt - screen_tigger_cnt) > 300)
         {
             lidar_ready_timeout = 0;
             if(set_motor_cmd(M_UP))
                 car_check_state = C_SINGLE_LIDAR_READY;
+            cout << "~~~~~~~~ area_control: set_motor_up 5" << endl;
         }
         else
         {

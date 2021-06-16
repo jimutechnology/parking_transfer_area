@@ -86,11 +86,10 @@ class DetectionCommand(Command):
             message_text += "\n" + "scanYaw: " + str(pose_in_map.theta)
             self.message = message_text
             self.Reply(state = CommandReply.STATE_FINISH)
-
-            self.motor_cmd.cmd = self.motor_cmd.CMD_DOWN
-            self.motor_cmd_pub.publish(self.motor_cmd)
         else:
             message_text = "result: " + str(False)
             self.message = message_text
             self.Reply(state = CommandReply.STATE_ERROR, error_code=self.transform_error(self.car_state_data))
         self.car_scanner_successful = False
+        self.motor_cmd.cmd = self.motor_cmd.CMD_DOWN
+        self.motor_cmd_pub.publish(self.motor_cmd)

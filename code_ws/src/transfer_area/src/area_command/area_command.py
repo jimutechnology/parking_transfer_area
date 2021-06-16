@@ -18,11 +18,9 @@ class AreaCommandMqtt(ServiceNode):
         self.lock_cmd_reply = threading.Lock()
         self.lock_dock_state = threading.Lock()
 
-        self.mqtt_sub_cmd_topic  = "scheduler/dock/command/TRS-1" #.format(self.area_id)
-        self.mqtt_pub_info_topic  = "scheduler/dock/info/TRS-1" #.format(self.area_id)
-
+        self.mqtt_sub_cmd_topic  = "scheduler/dock/command/TRS-1"
+        self.mqtt_pub_info_topic  = "scheduler/dock/info/TRS-1"
         self.mqtt_pub_cmd_reply_prefix  = "scheduler/dock/command_reply/"
-        
 
         self.cmdGroup = manager.CommandManger()
         self.cmd_reply_data = CommandReply()
@@ -47,7 +45,7 @@ class AreaCommandMqtt(ServiceNode):
             self.mqtt.publish(self.mqtt_pub_info_topic, str(self.dock_state_data), 0)
 
     def reply_command_and_reset(self, command):
-        reply_topic = self.mqtt_pub_cmd_reply_prefix + command.Session + "/TRS-1" #self.area_id
+        reply_topic = self.mqtt_pub_cmd_reply_prefix + command.Session + "/TRS-1"
         text = command.GetPublishMessage()
         if text:
             self.mqtt.publish(reply_topic, text)

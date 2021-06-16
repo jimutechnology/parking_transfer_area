@@ -10,7 +10,6 @@
 
     <node name="lidar_1" pkg="sick_tim" type="sick_tim551_2050001" respawn="false" />
     <node name="lidar_2" pkg="sick_tim" type="sick_tim551_2050001" respawn="false" />   
-    <!-- node name="plc_communication" pkg="transfer_area" type="plc_communication.py" / -->
     <node name="area_control" pkg="transfer_area" type="area_control"  output="screen" />
     <node name="area_command" pkg="transfer_area" type="area_command.py" output="screen"/>
     <node name="area_manager" pkg="transfer_area" type="area_manager.py" output="screen"/>
