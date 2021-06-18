@@ -131,6 +131,7 @@ public:
     uint64_t now;
 
     bool is_motor_lock = false;
+    uint16_t task_cnt=0;
 
 public:
     AreaControl()
@@ -502,7 +503,7 @@ void AreaControl::motor_cmd_update(void)
     if(is_lidar_scan_wheel[0])
     {
         //if(car_check_state == C_SCREEN_TIGGER)
-        if ((car_check_state == C_SCREEN_TIGGER) && (task_cnt - screen_tigger_cnt) > 300)
+        if ((car_check_state == C_SCREEN_TIGGER) && (task_cnt - screen_tigger_timeout) > 300)
         {
             lidar_ready_timeout = 0;
             if(set_motor_cmd(M_UP))
@@ -654,7 +655,7 @@ void AreaControl::display_control(void)
 
 void AreaControl::run(void)
 {
-	static uint16_t task_cnt=0;
+	//static uint16_t task_cnt=0;
 	task_cnt++;
 
     gettimeofday(&stamp, NULL);
