@@ -454,7 +454,7 @@ void AreaControl::motor_cmd_update(void)
             {
                 timeoutcnt = 0;
             }
-            cout << "~~~~~~~~ area_control: set_motor_down 3" << endl;
+            cout << "~~~~~~~~ area_control: set_motor_down 3 because of timeout" << endl;
         }
     }
     else
@@ -462,16 +462,16 @@ void AreaControl::motor_cmd_update(void)
         timeoutcnt = 0;
     }
 
-
     // step:1
     // 交接区内没有车
     if((!is_lidar_scan_wheel[0]) && (!is_lidar_scan_wheel[1]))
     {
         if(m_pos != M_POSITION_DOWN) {
             set_motor_cmd(M_DOWN);
-            cout << "~~~~~~~~ area_control: set_motor_down 4" << endl;
+            cout << "~~~~~~~~ area_control: set_motor_down 4 because of no car" << endl;
         }
         car_check_state = C_TRANSFER_EMPTY;
+        task_cnt = 0;
     }
     else
     {
@@ -479,7 +479,7 @@ void AreaControl::motor_cmd_update(void)
         // if(car_check_state == C_TRANSFER_EMPTY)
         //     car_check_state = C_NONE;
     }
-    
+    cout << "~~~~~~~~~~ condition 0, now: " << car_check_state << ", target: " << C_TRANSFER_EMPTY << ", detail:" << is_lidar_scan_wheel[0] << is_lidar_scan_wheel[1] << endl;
 
     // step:2
     if(is_screen_tigger[OUTSIDE_SCREEN_ID] && car_check_state == C_TRANSFER_EMPTY)
@@ -499,6 +499,13 @@ void AreaControl::motor_cmd_update(void)
             }
         }
     }
+    cout << "~~~~~~~~~~ condition 1.1, outDoorSensor: " << is_screen_tigger[OUTSIDE_SCREEN_ID] << ", target: true" << endl;
+    cout << "~~~~~~~~~~ condition 1.2, carEnterState: " << car_check_state << ", target: " << C_SCREEN_TIGGER << endl;
+    cout << "~~~~~~~~~~ condition 1.3, carEnterTime: " << screen_tigger_timeout << endl;
+
+    cout << "~~~~~~~~~~ condition 2.1, findLeftWheel: " << is_lidar_scan_wheel[0] << ", target: true" << endl;
+    cout << "~~~~~~~~~~ condition 2.2, carEnterState: " << car_check_state << ", target: " << C_SCREEN_TIGGER << endl;
+    cout << "~~~~~~~~~~ condition 2.3, fincLeftWheelTime = " << task_cnt << " - " << screen_tigger_timeout << " = " << (task_cnt-screen_tigger_timeout) << endl;
     // step:3
     if(is_lidar_scan_wheel[0])
     {
@@ -681,13 +688,6 @@ void AreaControl::run(void)
         is_lidar_scan_wheel[1] = false;
     }
     
-    // if(now - wheel_info_update_time >= 600000)
-    // {
-
-    //     is_lidar_scan_wheel[0] = false;
-    //     is_lidar_scan_wheel[1] = false;
-    // }
-    //printf("is lidar [%d %d]\r\n",is_lidar_scan_wheel[0],is_lidar_scan_wheel[1]);
     // screen
     update_ez_screen_state();
     
