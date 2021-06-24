@@ -523,7 +523,7 @@ void AreaControl::motor_cmd_update(void)
             if(lidar_ready_timeout > LIDAR_READY_CLEAR_TIMEOUT)
             {
                 lidar_ready_timeout = 0;
-                car_check_state = C_SINGLE_LIDAR_READY;
+                //car_check_state = C_SINGLE_LIDAR_READY;
             }
         }
         
