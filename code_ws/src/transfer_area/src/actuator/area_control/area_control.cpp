@@ -482,7 +482,8 @@ void AreaControl::motor_cmd_update(void)
     }
     else
     {
-        task_cnt = 0;
+        if (!is_screen_tigger[OUTSIDE_SCREEN_ID])
+            task_cnt = 0;
         if ((is_lidar_scan_wheel[0]) || (is_lidar_scan_wheel[1]))
             car_check_state = C_SCREEN_TIGGER;
     }
