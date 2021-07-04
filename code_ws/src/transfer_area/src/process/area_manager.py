@@ -127,11 +127,13 @@ class Area_Manager(ServiceNode):
         self.screen_cmd_pub = self.Publisher('screen_cmd', ScreenCmd, queue_size=1)
 
     def loop(self):
-        if self.DS.execute() == False and self.DC.execute() == False:
+        res_DS = self.DS.execute()
+        res_DC = self.DC.execute()
+        if res_DS == False and res_DC == False:
             self.screen_state.state = SS['FREE']
             self.car_detection_state = False
         elif self.car_detection_state == False:
-            if self.DS.execute() == False and self.DC.execute() == True:
+            if res_DS == False and res_DC == True:
                 if self.DC.car_scanner_successful == False:
                     self.screen_state.state = SS['LEAVE']
                 elif self.DC.car_state_data.is_car_available == True:
