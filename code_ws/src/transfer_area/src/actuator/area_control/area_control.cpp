@@ -493,7 +493,7 @@ void AreaControl::motor_cmd_update(void)
         if(car_check_state == C_SCREEN_TIGGER)
         {
             screen_tigger_timeout++;
-            if(screen_tigger_timeout > SCREEN_TIGGER_WAIT_TIMEOUT)
+            if(screen_tigger_timeout > SCREEN_TIGGER_WAIT_TIMEOUT/10)
             {
                 screen_tigger_timeout = 0;
                 car_check_state = C_NONE;
