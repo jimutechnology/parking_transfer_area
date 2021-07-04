@@ -710,7 +710,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, AREA_CONTROL);
     ros::NodeHandle nh("");
-    ros::Rate r(AREA_CONTROL_HZ/100);
+    ros::Rate r(AREA_CONTROL_HZ/10);
 
     AreaControl area_ctrl;
 
