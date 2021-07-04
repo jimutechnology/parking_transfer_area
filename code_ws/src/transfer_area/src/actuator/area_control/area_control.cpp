@@ -473,7 +473,11 @@ void AreaControl::motor_cmd_update(void)
         }
         car_check_state = C_TRANSFER_EMPTY;
         task_cnt = 0;
-        key_clock = 0;
+        if (key_clock > 0) {
+            key_clock++;
+            if (key_clock > 30) // wait 3s for car entering
+                key_clock = 0;
+        }
     }
     else
     {
