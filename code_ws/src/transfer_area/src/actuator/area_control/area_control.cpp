@@ -511,7 +511,7 @@ void AreaControl::motor_cmd_update(void)
     if(is_lidar_scan_wheel[0])
     {
         //if(car_check_state == C_SCREEN_TIGGER)
-        if ((car_check_state == C_SCREEN_TIGGER) && (task_cnt - key_clock) > 30)
+        if ((car_check_state == C_SCREEN_TIGGER) && (key_clock > 0) && (task_cnt - key_clock) > 30)
         {
             lidar_ready_timeout = 0;
             if(set_motor_cmd(M_UP))
