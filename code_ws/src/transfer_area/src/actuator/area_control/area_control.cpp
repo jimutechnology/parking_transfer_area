@@ -557,7 +557,7 @@ void AreaControl::update_ez_screen_state(void)
         if(GPIO_VALUE_LOW == EZ_SCREEN_OUTSIDE->gpio_read(EZ_SCREEN_OUTSIDE_PIN))
         {
             screen_tigger_cnt[OUTSIDE_SCREEN_ID]++;
-            if(screen_tigger_cnt[OUTSIDE_SCREEN_ID]  > SCREEN_TIGGER_TIMEOUT)
+            if(screen_tigger_cnt[OUTSIDE_SCREEN_ID]  > SCREEN_TIGGER_TIMEOUT/10)
             {
                 is_screen_tigger[OUTSIDE_SCREEN_ID] = true;
                 // if(car_check_state == C_NONE)
@@ -599,7 +599,7 @@ void AreaControl::update_ez_screen_state(void)
         if(GPIO_VALUE_LOW == EZ_SCREEN_INSIDE->gpio_read(EZ_SCREEN_INSIDE_PIN))
         {
             screen_tigger_cnt[INSIDE_SCREEN_ID]++;
-            if(screen_tigger_cnt[INSIDE_SCREEN_ID] > SCREEN_TIGGER_TIMEOUT)
+            if(screen_tigger_cnt[INSIDE_SCREEN_ID] > SCREEN_TIGGER_TIMEOUT/10)
             {
                 is_screen_tigger[INSIDE_SCREEN_ID] = true;
             }
