@@ -476,7 +476,7 @@ void AreaControl::motor_cmd_update(void)
     }
     else
     {
-        if (is_lidar_scan_wheel[0]) || (is_lidar_scan_wheel[1])
+        if ((is_lidar_scan_wheel[0]) || (is_lidar_scan_wheel[1]))
             car_check_state = C_SCREEN_TIGGER
     }
     cout << "~~~~~~~~~~ condition 0.1, now: " << car_check_state << ", target: " << C_TRANSFER_EMPTY << ", detail:" << is_lidar_scan_wheel[0] << ", " << is_lidar_scan_wheel[1] << endl;
