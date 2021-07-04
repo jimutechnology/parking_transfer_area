@@ -473,11 +473,12 @@ void AreaControl::motor_cmd_update(void)
         }
         car_check_state = C_TRANSFER_EMPTY;
         task_cnt = 0;
-        if (key_clock > 0) {
+        if (is_screen_tigger[OUTSIDE_SCREEN_ID] && !is_screen_tigger[INSIDE_SCREEN_ID]) {
             key_clock++;
-            if (key_clock > 101) // wait 3s for car entering
+            if (key_clock > 101)
                 key_clock = 0;
-        }
+        } else
+            key_clock = 0;
     }
     else
     {
