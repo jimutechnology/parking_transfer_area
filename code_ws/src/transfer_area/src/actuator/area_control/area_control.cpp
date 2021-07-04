@@ -473,6 +473,7 @@ void AreaControl::motor_cmd_update(void)
         }
         car_check_state = C_TRANSFER_EMPTY;
         task_cnt = 0;
+        key_clock = 0;
     }
     else
     {
