@@ -512,7 +512,7 @@ void AreaControl::motor_cmd_update(void)
     if(is_lidar_scan_wheel[0])
     {
         //if(car_check_state == C_SCREEN_TIGGER)
-        if ((car_check_state == C_SCREEN_TIGGER) && (task_cnt - key_clock) > 300)
+        if ((car_check_state == C_SCREEN_TIGGER) && (task_cnt - key_clock) > 30)
         {
             lidar_ready_timeout = 0;
             if(set_motor_cmd(M_UP))
@@ -671,6 +671,9 @@ void AreaControl::run(void)
     now = stamp.tv_sec*1000000 + stamp.tv_usec;
     // printf("now:%ld,a:%ld %ld\r\n",now,wheel_info_update_time,(now - wheel_info_update_time));
     // printf("----now:%ld,a:%ld %ld\r\n",lidar_scan_update_time[0],lidar_scan_update_time[1],(now - lidar_scan_update_time[0]));
+    cout << "now: " << now << endl;
+    cout << "lidar0 update at: " << lidar_scan_update_time[0] << endl;
+    cout << "lidar1 update at: " << lidar_scan_update_time[1] << endl;
 
     if((now - lidar_scan_update_time[0]) < 600000)
     {
