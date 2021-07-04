@@ -485,7 +485,7 @@ void AreaControl::motor_cmd_update(void)
     if(is_screen_tigger[OUTSIDE_SCREEN_ID] && (car_check_state == C_TRANSFER_EMPTY))
     {
         car_check_state = C_SCREEN_TIGGER;
-        key_clock = task_cnt;
+        key_clock = 1;
         cout << "~~~~~~~~~~ condition 0.3, carEnterTime: " << key_clock << endl;
     }
     else
