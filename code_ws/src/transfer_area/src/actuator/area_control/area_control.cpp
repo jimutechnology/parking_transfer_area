@@ -327,7 +327,7 @@ bool AreaControl::set_motor_cmd(motor_cmd cmd)
         m_cmd = cmd;
         if(cmd == M_DOWN)
             car_check_state = C_NONE;
-        return true;      
+        return true;
     }
     return false;
 }
@@ -522,11 +522,11 @@ void AreaControl::motor_cmd_update(void)
         if ((car_check_state == C_SCREEN_TIGGER) && (key_clock > 0) && (task_cnt - key_clock) > 30)
         {
             lidar_ready_timeout = 0;
-            if(set_motor_cmd(M_UP)){
+            /*if(set_motor_cmd(M_UP)){
                 key_clock = 0;
                 car_check_state = C_SINGLE_LIDAR_READY;
-                cout << "~~~~~~~~ area_control: set_motor_up 5" << endl;
-            }
+            }*/
+            cout << "~~~~~~~~ area_control: set_motor_up 5" << endl;
         }
         else
         {

@@ -5,6 +5,7 @@
 import time
 from cmd_door import DoorCommand
 from cmd_detection import DetectionCommand
+from cmd_lidar import LidarCommand
 from cmd_lock import LockCommand
 from cmd_state import StateCommand
 
@@ -17,6 +18,7 @@ class CommandManger:
             "STATE"     : StateCommand(),
             "DETECTION" : DetectionCommand(),
             "LOCK"      : LockCommand(),
+            "LIDAR"     : LidarCommand(),
         }
 
     def execute(self, pydict):
