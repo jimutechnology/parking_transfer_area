@@ -14,9 +14,9 @@ class LidarCommand(Command):
     def execute(self, cmd_dict):
         motor_cmd_data = MotorCmd()
         if (cmd_dict['enable'] == True):
-            motor_cmd_data.cmd = CMD_UP
+            motor_cmd_data.cmd = MotorCmd.CMD_UP
         else:
-            motor_cmd_data.cmd = CMD_DOWN
+            motor_cmd_data.cmd = MotorCmd.CMD_DOWN
         self.motor_cmd_pub.publish(motor_cmd_data)
         self.reply_result()
 

@@ -469,7 +469,7 @@ void AreaControl::motor_cmd_update(void)
     {
         if(m_pos != M_POSITION_DOWN) {
             set_motor_cmd(M_DOWN);
-            cout << "~~~~~~~~ area_control: set_motor_down 4 because of no car" << endl;
+            //cout << "~~~~~~~~ area_control: set_motor_down 4 because of no car" << endl;
         }
         car_check_state = C_TRANSFER_EMPTY;
         task_cnt = 0;
@@ -487,14 +487,14 @@ void AreaControl::motor_cmd_update(void)
         if ((is_lidar_scan_wheel[0]) || (is_lidar_scan_wheel[1]))
             car_check_state = C_SCREEN_TIGGER;
     }
-    cout << "~~~~~~~~~~ condition 0.1, now: " << car_check_state << ", target: " << C_TRANSFER_EMPTY << ", detail:" << is_lidar_scan_wheel[0] << ", " << is_lidar_scan_wheel[1] << endl;
-    cout << "~~~~~~~~~~ condition 0.2, light_curtain: " << is_screen_tigger[OUTSIDE_SCREEN_ID] << ", " << is_screen_tigger[INSIDE_SCREEN_ID] << endl;
+    //cout << "~~~~~~~~~~ condition 0.1, now: " << car_check_state << ", target: " << C_TRANSFER_EMPTY << ", detail:" << is_lidar_scan_wheel[0] << ", " << is_lidar_scan_wheel[1] << endl;
+    //cout << "~~~~~~~~~~ condition 0.2, light_curtain: " << is_screen_tigger[OUTSIDE_SCREEN_ID] << ", " << is_screen_tigger[INSIDE_SCREEN_ID] << endl;
     // step:2
     if(is_screen_tigger[OUTSIDE_SCREEN_ID] && (car_check_state == C_TRANSFER_EMPTY))
     {
         car_check_state = C_SCREEN_TIGGER;
         key_clock = 1;
-        cout << "~~~~~~~~~~ condition 0.3, carEnterTime: " << key_clock << endl;
+        //cout << "~~~~~~~~~~ condition 0.3, carEnterTime: " << key_clock << endl;
     }
     else
     {
@@ -508,13 +508,13 @@ void AreaControl::motor_cmd_update(void)
             }
         }
     }
-    cout << "~~~~~~~~~~ condition 1.1, outDoorSensor: " << is_screen_tigger[OUTSIDE_SCREEN_ID] << ", target: true" << endl;
-    cout << "~~~~~~~~~~ condition 1.2, carEnterState: " << car_check_state << ", target: " << C_SCREEN_TIGGER << endl;
-    cout << "~~~~~~~~~~ condition 1.3, carEnterTime: " << key_clock << endl;
+    //cout << "~~~~~~~~~~ condition 1.1, outDoorSensor: " << is_screen_tigger[OUTSIDE_SCREEN_ID] << ", target: true" << endl;
+    //cout << "~~~~~~~~~~ condition 1.2, carEnterState: " << car_check_state << ", target: " << C_SCREEN_TIGGER << endl;
+    //cout << "~~~~~~~~~~ condition 1.3, carEnterTime: " << key_clock << endl;
 
-    cout << "~~~~~~~~~~ condition 2.1, findLeftWheel: " << is_lidar_scan_wheel[0] << ", target: true" << endl;
-    cout << "~~~~~~~~~~ condition 2.2, carEnterState: " << car_check_state << ", target: " << C_SCREEN_TIGGER << endl;
-    cout << "~~~~~~~~~~ condition 2.3, fincLeftWheelTime = " << task_cnt << " - " << key_clock << " = " << (task_cnt-key_clock) << endl;
+    //cout << "~~~~~~~~~~ condition 2.1, findLeftWheel: " << is_lidar_scan_wheel[0] << ", target: true" << endl;
+    //cout << "~~~~~~~~~~ condition 2.2, carEnterState: " << car_check_state << ", target: " << C_SCREEN_TIGGER << endl;
+    //cout << "~~~~~~~~~~ condition 2.3, fincLeftWheelTime = " << task_cnt << " - " << key_clock << " = " << (task_cnt-key_clock) << endl;
     // step:3
     if(is_lidar_scan_wheel[0])
     {
@@ -526,7 +526,7 @@ void AreaControl::motor_cmd_update(void)
                 key_clock = 0;
                 car_check_state = C_SINGLE_LIDAR_READY;
             }*/
-            cout << "~~~~~~~~ area_control: set_motor_up 5" << endl;
+            //cout << "~~~~~~~~ area_control: set_motor_up 5" << endl;
         }
         else
         {
