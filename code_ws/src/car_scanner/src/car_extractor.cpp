@@ -54,7 +54,7 @@ void    CarExtractor::UpdateWheelInfo(const WheelArray &wheelInfo)
         }
     }
 
-    if(b_available_left || b_available_right)
+    if(b_available_left && b_available_right)
     {
         b_available = true;
         CalculateCarInfo();
