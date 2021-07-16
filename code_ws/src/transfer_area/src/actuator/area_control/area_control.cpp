@@ -518,7 +518,6 @@ void AreaControl::motor_cmd_update(void)
     // step:3
     if(is_lidar_scan_wheel[0])
     {
-        d_cmd = D_OK;
         if ((car_check_state == C_SCREEN_TIGGER) && (key_clock > 0) && (task_cnt - key_clock) > 30)
         {
             lidar_ready_timeout = 0;
@@ -637,10 +636,17 @@ void AreaControl::area_cmd_update(void)
     ;
 }
 
-
-
 void AreaControl::display_control(void)
 {
+    // take care of outdoor&indoor sensors and installed laser information to decide display content
+    if (is_screen_tigger[INSIDE_SCREEN_ID] == true) {
+        d_cmd = D_BACK;
+    } else if (is_screen_tigger[OUTSIDE_SCREEN_ID] == true) {
+        d_cmd = D_FORWARD;
+    } else if (is_lidar_scan_wheel[0] == true) {
+        d_cmd = D_OK;
+    }
+
     if(d_cmd == D_FORWARD)
     {
         DISPLAY_A1->gpio_write(DISPLAY_A1_PIN,GPIO_VALUE_HIGH);
